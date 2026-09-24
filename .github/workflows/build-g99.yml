@@ -23,7 +23,7 @@ jobs:
         run: |
           SDKMANAGER=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | sort -V | tail -1)
           yes | "$SDKMANAGER" --licenses > /dev/null || true
-          "$SDKMANAGER" "ndk;27.0.12077973" "platforms;android-34"
+          "$SDKMANAGER" "ndk;27.0.12077973" "platforms;android-36"
 
       - name: Create signing key
         # Throwaway key so the release (non-debuggable) build is installable.

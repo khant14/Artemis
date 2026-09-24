@@ -462,99 +462,102 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         if (context instanceof InputDeviceContext) {
             InputDeviceContext devContext = (InputDeviceContext) context;
 
-            LimeLog.info(devContext.name+" ("+context.id+") needs a controller number assigned");
-            if (!devContext.external) {
-                LimeLog.info("Built-in buttons hardcoded as controller 0");
-                context.controllerNumber = 0;
-            }
-            else if (prefConfig.multiController && devContext.hasJoystickAxes) {
-                context.controllerNumber = 0;
+            if (context instanceof UsbDeviceContext) {
+                if (prefConfig.multiController) {
+                    LimeLog.info("Reserving the next available controller number for USB device");
+                    for (short i = 0; i < MAX_GAMEPADS; i++) {
+                        if ((currentControllers & (1 << i)) == 0) {
+                            // Found an unused controller value
+                            currentControllers |= (1 << i);
 
-                LimeLog.info("Reserving the next available controller number");
-                for (short i = 0; i < MAX_GAMEPADS; i++) {
-                    if ((currentControllers & (1 << i)) == 0) {
-                        // Found an unused controller value
-                        currentControllers |= (1 << i);
+                            // Take this value out of the initial gamepad set
+                            initialControllers &= ~(1 << i);
 
-                        // Take this value out of the initial gamepad set
-                        initialControllers &= ~(1 << i);
-
-                        context.controllerNumber = i;
-                        context.reservedControllerNumber = true;
-                        break;
+                            context.controllerNumber = i;
+                            context.reservedControllerNumber = true;
+                            break;
+                        }
                     }
                 }
-            }
-            else if (!devContext.hasJoystickAxes) {
-                // If this device doesn't have joystick axes, it may be an input device associated
-                // with another joystick (like a PS4 touchpad). We'll propagate that joystick's
-                // controller number to this associated device.
+                else {
+                    LimeLog.info("Not reserving a controller number");
+                    context.controllerNumber = 0;
+                }
 
-                context.controllerNumber = 0;
+                // If the gamepad doesn't have motion sensors, use the on-device sensors as a fallback for player 1
+                if (prefConfig.gamepadMotionSensorsFallbackToDevice && context.controllerNumber == 0 && (prefConfig.forceMotionSensorsFallbackToDevice || devContext.sensorManager == null)) {
+                    devContext.sensorManager = deviceSensorManager;
+                }
+            } else {
 
-                // For the DS4 case, the associated joystick is the next device after the touchpad.
-                // We'll try the opposite case too, just to be a little future-proof.
-                InputDevice associatedDevice = InputDevice.getDevice(devContext.id + 1);
-                if (!isAssociatedJoystick(devContext.inputDevice, associatedDevice)) {
-                    associatedDevice = InputDevice.getDevice(devContext.id - 1);
+                LimeLog.info(devContext.name+" ("+context.id+") needs a controller number assigned");
+                if (!devContext.external) {
+                    LimeLog.info("Built-in buttons hardcoded as controller 0");
+                    context.controllerNumber = 0;
+                }
+                else if (prefConfig.multiController && devContext.hasJoystickAxes) {
+                    LimeLog.info("Reserving the next available controller number");
+                    for (short i = 0; i < MAX_GAMEPADS; i++) {
+                        if ((currentControllers & (1 << i)) == 0) {
+                            // Found an unused controller value
+                            currentControllers |= (1 << i);
+
+                            // Take this value out of the initial gamepad set
+                            initialControllers &= ~(1 << i);
+
+                            context.controllerNumber = i;
+                            context.reservedControllerNumber = true;
+                            break;
+                        }
+                    }
+                }
+                else if (!devContext.hasJoystickAxes) {
+                    // If this device doesn't have joystick axes, it may be an input device associated
+                    // with another joystick (like a PS4 touchpad). We'll propagate that joystick's
+                    // controller number to this associated device.
+
+                    context.controllerNumber = 0;
+
+                    // For the DS4 case, the associated joystick is the next device after the touchpad.
+                    // We'll try the opposite case too, just to be a little future-proof.
+                    InputDevice associatedDevice = InputDevice.getDevice(devContext.id + 1);
                     if (!isAssociatedJoystick(devContext.inputDevice, associatedDevice)) {
-                        LimeLog.info("No associated joystick device found");
-                        associatedDevice = null;
+                        associatedDevice = InputDevice.getDevice(devContext.id - 1);
+                        if (!isAssociatedJoystick(devContext.inputDevice, associatedDevice)) {
+                            LimeLog.info("No associated joystick device found");
+                            associatedDevice = null;
+                        }
+                    }
+
+                    if (associatedDevice != null) {
+                        InputDeviceContext associatedDeviceContext = inputDeviceContexts.get(associatedDevice.getId());
+
+                        // Create a new context for the associated device if one doesn't exist
+                        if (associatedDeviceContext == null) {
+                            associatedDeviceContext = createInputDeviceContextForDevice(associatedDevice);
+                            inputDeviceContexts.put(associatedDevice.getId(), associatedDeviceContext);
+                        }
+
+                        // Assign a controller number for the associated device if one isn't assigned
+                        if (!associatedDeviceContext.assignedControllerNumber) {
+                            assignControllerNumberIfNeeded(associatedDeviceContext);
+                        }
+
+                        // Propagate the associated controller number
+                        context.controllerNumber = associatedDeviceContext.controllerNumber;
+
+                        LimeLog.info("Propagated controller number from "+associatedDeviceContext.name);
                     }
                 }
-
-                if (associatedDevice != null) {
-                    InputDeviceContext associatedDeviceContext = inputDeviceContexts.get(associatedDevice.getId());
-
-                    // Create a new context for the associated device if one doesn't exist
-                    if (associatedDeviceContext == null) {
-                        associatedDeviceContext = createInputDeviceContextForDevice(associatedDevice);
-                        inputDeviceContexts.put(associatedDevice.getId(), associatedDeviceContext);
-                    }
-
-                    // Assign a controller number for the associated device if one isn't assigned
-                    if (!associatedDeviceContext.assignedControllerNumber) {
-                        assignControllerNumberIfNeeded(associatedDeviceContext);
-                    }
-
-                    // Propagate the associated controller number
-                    context.controllerNumber = associatedDeviceContext.controllerNumber;
-
-                    LimeLog.info("Propagated controller number from "+associatedDeviceContext.name);
+                else {
+                    LimeLog.info("Not reserving a controller number");
+                    context.controllerNumber = 0;
                 }
-            }
-            else {
-                LimeLog.info("Not reserving a controller number");
-                context.controllerNumber = 0;
-            }
 
-            // If the gamepad doesn't have motion sensors, use the on-device sensors as a fallback for player 1
-            if (prefConfig.gamepadMotionSensorsFallbackToDevice && context.controllerNumber == 0 && devContext.sensorManager == null) {
-                devContext.sensorManager = deviceSensorManager;
-            }
-        }
-        else {
-            if (prefConfig.multiController) {
-                context.controllerNumber = 0;
-
-                LimeLog.info("Reserving the next available controller number");
-                for (short i = 0; i < MAX_GAMEPADS; i++) {
-                    if ((currentControllers & (1 << i)) == 0) {
-                        // Found an unused controller value
-                        currentControllers |= (1 << i);
-
-                        // Take this value out of the initial gamepad set
-                        initialControllers &= ~(1 << i);
-
-                        context.controllerNumber = i;
-                        context.reservedControllerNumber = true;
-                        break;
-                    }
+                // If the gamepad doesn't have motion sensors, use the on-device sensors as a fallback for player 1
+                if (prefConfig.gamepadMotionSensorsFallbackToDevice && context.controllerNumber == 0 && (prefConfig.forceMotionSensorsFallbackToDevice || devContext.sensorManager == null)) {
+                    devContext.sensorManager = deviceSensorManager;
                 }
-            }
-            else {
-                LimeLog.info("Not reserving a controller number");
-                context.controllerNumber = 0;
             }
         }
 
@@ -1269,8 +1272,41 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             boolean aDown = (inputMap & ControllerPacket.A_FLAG) != 0;
             boolean bDown = (inputMap & ControllerPacket.B_FLAG) != 0;
 
+            boolean xDown = (inputMap & ControllerPacket.X_FLAG) != 0;
+            boolean yDown = (inputMap & ControllerPacket.Y_FLAG) != 0;
+
             originalContext.mouseEmulationLastInputMap = inputMap;
 
+            // Set the flag for the fixed pixel mouse movement while X_FLAG button is pressed
+            if((changedMask & ControllerPacket.X_FLAG) != 0)
+            {
+                // Set true when pressed
+                if( xDown ) {
+                    originalContext.mouseEmulationXDown = true;
+                }
+                // Set false when released
+                else
+                {
+                    originalContext.mouseEmulationXDown = false;
+                }
+            }
+
+            if((changedMask & ControllerPacket.Y_FLAG) != 0)
+            {
+                if( yDown )
+                {
+                    // Double the pixel multiplier every button press
+                    originalContext.mouseEmulationPixelMultiplier *= 2;
+                    if( originalContext.mouseEmulationPixelMultiplier > 255 )
+                    {
+                        // Reset the multiplier back to 1 if it gets too big
+                        originalContext.mouseEmulationPixelMultiplier = 1;
+                    }
+                }
+                else {
+                    // Do nothing as this is when the button is released; Holding the button will not continuously increase the pixel multiplier
+                }
+            }
             if ((changedMask & ControllerPacket.A_FLAG) != 0) {
                 if (aDown) {
                     conn.sendMouseButtonDown(MouseButtonPacket.BUTTON_LEFT);
@@ -1929,10 +1965,20 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         return vector;
     }
 
-    private void sendEmulatedMouseMove(short x, short y) {
+    private void sendEmulatedMouseMove(short x, short y, boolean mouseEmulationXDown, int mouseEmulationPixelMultiplier) {
         Vector2d vector = convertRawStickAxisToPixelMovement(x, y);
         if (vector.getMagnitude() >= 1) {
-            conn.sendMouseMove((short)vector.getX(), (short)-vector.getY());
+
+            // Used a fixed amount of mouse movement while the X button is pressed
+            if(mouseEmulationXDown == true )
+            {
+                // convert the vector number to -1 if negative and +1 if positive and then send the mouse movement in pixels
+                conn.sendMouseMove((short)(Integer.signum((int)vector.getX()) * mouseEmulationPixelMultiplier) , (short)(Integer.signum((int)-vector.getY()) * mouseEmulationPixelMultiplier) );
+            }
+            else {
+                // If X button is not pressed, base the movement on how much the stick is moved from the center
+                conn.sendMouseMove((short) vector.getX(), (short) -vector.getY());
+            }
         }
     }
 
@@ -2458,13 +2504,12 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             // Make sure it's real by checking that the key is actually down before taking
             // any action.
             if ((context.inputMap & ControllerPacket.PLAY_FLAG) != 0 &&
-                    context.startUpTime - context.startDownTime > ControllerHandler.START_DOWN_TIME_MOUSE_MODE_MS &&
-                    prefConfig.mouseEmulation) {
+                    context.startUpTime - context.startDownTime > ControllerHandler.START_DOWN_TIME_MOUSE_MODE_MS) {
                 if (prefConfig.enableBackMenu && context.backMenuPending){
                     //todo 展示快捷菜单
                     context.backMenuPending = false;
                     gestures.showGameMenu(context);
-                } else {
+                } else if (prefConfig.mouseEmulation) {
                     context.toggleMouseEmulation();
                 }
             }
@@ -2472,12 +2517,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
             break;
         case KeyEvent.KEYCODE_BACK:
             if (prefConfig.backAsGuide) {
-                if (context.needsClickpadEmulation) {
-                    context.inputMap &= ~ControllerPacket.SPECIAL_BUTTON_FLAG;
-                }
-                else {
-                    context.inputMap &= ~ControllerPacket.MISC_FLAG;
-                }
+                context.inputMap &= ~ControllerPacket.SPECIAL_BUTTON_FLAG;
                 break;
             }
         case KeyEvent.KEYCODE_BUTTON_SELECT:
@@ -2700,12 +2740,7 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         case KeyEvent.KEYCODE_BACK:
             if (prefConfig.backAsGuide) {
                 context.hasSelect = true;
-                if (context.needsClickpadEmulation) {
-                    context.inputMap |= ControllerPacket.SPECIAL_BUTTON_FLAG;
-                }
-                else {
-                    context.inputMap |= ControllerPacket.MISC_FLAG;
-                }
+                context.inputMap |= ControllerPacket.SPECIAL_BUTTON_FLAG;
                 break;
             }
         case KeyEvent.KEYCODE_BUTTON_SELECT:
@@ -3017,6 +3052,9 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
         public short leftStickY = 0x0000;
 
         public boolean mouseEmulationActive;
+        public boolean mouseEmulationXDown = false;
+        public int mouseEmulationPixelMultiplier = 1;
+
         public int mouseEmulationLastInputMap;
         public final int mouseEmulationReportPeriod = 50;
 
@@ -3029,16 +3067,18 @@ public class ControllerHandler implements InputManager.InputDeviceListener, UsbD
 
                 // Send mouse events from analog sticks
                 if (prefConfig.analogStickForScrolling == PreferenceConfiguration.AnalogStickForScrolling.RIGHT) {
-                    sendEmulatedMouseMove(leftStickX, leftStickY);
+
+                    // Changed absolute value
+                    sendEmulatedMouseMove(leftStickX, leftStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
                     sendEmulatedMouseScroll(rightStickX, rightStickY);
                 }
                 else if (prefConfig.analogStickForScrolling == PreferenceConfiguration.AnalogStickForScrolling.LEFT) {
-                    sendEmulatedMouseMove(rightStickX, rightStickY);
+                    sendEmulatedMouseMove(rightStickX, rightStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
                     sendEmulatedMouseScroll(leftStickX, leftStickY);
                 }
                 else {
-                    sendEmulatedMouseMove(leftStickX, leftStickY);
-                    sendEmulatedMouseMove(rightStickX, rightStickY);
+                    sendEmulatedMouseMove(leftStickX, leftStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
+                    sendEmulatedMouseMove(rightStickX, rightStickY, mouseEmulationXDown, mouseEmulationPixelMultiplier);
                 }
 
                 // Requeue the callback

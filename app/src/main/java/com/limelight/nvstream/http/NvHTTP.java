@@ -438,6 +438,7 @@ public class NvHTTP {
 
         details.pairState = getPairState(serverInfo);
         details.runningGameId = getCurrentGame(serverInfo);
+        details.runningGameUUID = getCurrentGameUUID(serverInfo);
 
         // The MJOLNIR codename was used by GFE but never by any third-party server
         details.nvidiaServer = getXmlString(serverInfo, "state", true).contains("MJOLNIR");
@@ -447,7 +448,11 @@ public class NvHTTP {
 
         return details;
     }
-    
+
+    public String getCurrentGameUUID(String serverInfo) throws IOException, XmlPullParserException {
+        return getXmlString(serverInfo, "currentgameuuid", false);
+    }
+
     public ComputerDetails getComputerDetails(boolean likelyOnline) throws IOException, XmlPullParserException {
         return getComputerDetails(getServerInfo(likelyOnline));
     }
@@ -741,6 +746,10 @@ public class NvHTTP {
                 NvApp app = appList.getLast();
                 if (currentTag.peek().equals("AppTitle")) {
                     app.setAppName(xpp.getText());
+                } else if (currentTag.peek().equals("UUID")) {
+                    app.setAppUUID(xpp.getText());
+                } else if (currentTag.peek().equals("IDX")) {
+                    app.setAppIndex(Integer.parseInt(xpp.getText()));
                 } else if (currentTag.peek().equals("ID")) {
                     app.setAppId(xpp.getText());
                 } else if (currentTag.peek().equals("IsHdrSupported")) {
@@ -837,13 +846,19 @@ public class NvHTTP {
         return new String(hexChars);
     }
     
-    public boolean launchApp(ConnectionContext context, String verb, int appId, boolean enableHdr) throws IOException, XmlPullParserException {
+    public boolean launchApp(ConnectionContext context, String verb, String appUUID, int appId, boolean enableHdr) throws IOException, XmlPullParserException {
         // Using an FPS value over 60 causes SOPS to default to 720p60,
         // so force it to 0 to ensure the correct resolution is set. We
         // used to use 60 here but that locked the frame rate to 60 FPS
         // on GFE 3.20.3.
-        int fps = context.isNvidiaServerSoftware && context.streamConfig.getLaunchRefreshRate() > 60 ?
+        float fps = context.isNvidiaServerSoftware && context.streamConfig.getLaunchRefreshRate() > 60 ?
                 0 : context.streamConfig.getLaunchRefreshRate();
+
+        int fpsInt = (int)fps;
+
+        if (fpsInt != fps) {
+            fpsInt = (int)(fps * 1000);
+        }
 
         boolean enableSops = context.streamConfig.getSops();
         if (context.isNvidiaServerSoftware) {
@@ -862,7 +877,8 @@ public class NvHTTP {
 
         String xmlStr = openHttpConnectionToString(httpClientLongConnectNoReadTimeout, getHttpsUrl(true), verb,
             "appid=" + appId +
-            "&mode=" + context.negotiatedWidth + "x" + context.negotiatedHeight + "x" + fps +
+            (appUUID == null ? "" : ("&appuuid=" + appUUID)) +
+            "&mode=" + context.negotiatedWidth + "x" + context.negotiatedHeight + "x" + fpsInt +
             "&scaleFactor=" + context.streamConfig.getResolutionScaleFactor() +
             "&additionalStates=1&sops=" + (enableSops ? 1 : 0) +
             "&rikey="+bytesToHex(context.riKey.getEncoded()) +

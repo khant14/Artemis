@@ -38,6 +38,7 @@
                 android:layout_below="@id/grid_overlay"
                 android:layout_margin="5dp"
                 android:gravity="center|center_vertical"
+                android:background="#00FFFFFF"
                 android:textAlignment="center"
                 android:textSize="18sp" />
         </RelativeLayout>

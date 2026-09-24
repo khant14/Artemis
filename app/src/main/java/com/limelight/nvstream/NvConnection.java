@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
@@ -310,13 +311,16 @@ public class NvConnection {
         }
         
         // If there's a game running, resume it
-        if (h.getCurrentGame(serverInfo) != 0) {
+        if (h.getCurrentGame(serverInfo) != 0 || (h.getCurrentGameUUID(serverInfo) != null && !h.getCurrentGameUUID(serverInfo).isEmpty())) {
             try {
-                if (h.getCurrentGame(serverInfo) == app.getAppId()) {
-                    if (!h.launchApp(context, "resume", app.getAppId(), context.negotiatedHdr)) {
+                if (h.getCurrentGame(serverInfo) == app.getAppId() || Objects.equals(h.getCurrentGameUUID(serverInfo), app.getAppUUID())) {
+                    if (!h.launchApp(context, "resume", app.getAppUUID(), app.getAppId(), context.negotiatedHdr)) {
                         context.connListener.displayMessage("Failed to resume existing session");
                         return false;
                     }
+                } else if (Objects.equals(NvApp.REMOTE_INPUT_UUID, app.getAppUUID())) {
+                    // When launching InputOnly, we shouldn't try terminating the current running app
+                    return launchNotRunningApp(h, context);
                 } else {
                     return quitAndLaunch(h, context);
                 }
@@ -371,7 +375,7 @@ public class NvConnection {
     private boolean launchNotRunningApp(NvHTTP h, ConnectionContext context)
             throws IOException, XmlPullParserException {
         // Launch the app since it's not running
-        if (!h.launchApp(context, "launch", context.streamConfig.getApp().getAppId(), context.negotiatedHdr)) {
+        if (!h.launchApp(context, "launch", context.streamConfig.getApp().getAppUUID(), context.streamConfig.getApp().getAppId(), context.negotiatedHdr)) {
             context.connListener.displayMessage("Failed to launch application");
             return false;
         }
@@ -478,8 +482,6 @@ public class NvConnection {
     }
 
     public void sendExecServerCmd(final int cmdId) {
-        LimeLog.info("sendExecServerCmd: " + cmdId);
-
         if (!isMonkey) {
             MoonBridge.sendExecServerCmd(cmdId);
         }
@@ -487,8 +489,6 @@ public class NvConnection {
     
     public void sendMouseMove(final short deltaX, final short deltaY)
     {
-        LimeLog.info("sendMousePosition==1-"+deltaX+","+deltaY);
-
         if (!isMonkey) {
             MoonBridge.sendMouseMove(deltaX, deltaY);
         }
@@ -496,7 +496,6 @@ public class NvConnection {
 
     public void sendMousePosition(short x, short y, short referenceWidth, short referenceHeight)
     {
-        LimeLog.info("sendMousePosition==2");
         if (!isMonkey) {
             MoonBridge.sendMousePosition(x, y, referenceWidth, referenceHeight);
         }
@@ -504,8 +503,6 @@ public class NvConnection {
 
     public void sendMouseMoveAsMousePosition(short deltaX, short deltaY, short referenceWidth, short referenceHeight)
     {
-        LimeLog.info("sendMousePosition==3-"+deltaX);
-
         if (!isMonkey) {
             MoonBridge.sendMouseMoveAsMousePosition(deltaX, deltaY, referenceWidth, referenceHeight);
         }
@@ -513,7 +510,6 @@ public class NvConnection {
 
     public void sendMouseButtonDown(final byte mouseButton)
     {
-        LimeLog.info("sendMousePosition==4");
         if (!isMonkey) {
             MoonBridge.sendMouseButton(MouseButtonPacket.PRESS_EVENT, mouseButton);
         }
@@ -521,7 +517,6 @@ public class NvConnection {
     
     public void sendMouseButtonUp(final byte mouseButton)
     {
-        LimeLog.info("sendMousePosition==5");
         if (!isMonkey) {
             MoonBridge.sendMouseButton(MouseButtonPacket.RELEASE_EVENT, mouseButton);
         }

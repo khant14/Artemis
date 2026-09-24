@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.limelight.binding.PlatformBinding;
 import com.limelight.binding.crypto.AndroidCryptoProvider;
 import com.limelight.computers.ComputerManagerListener;
@@ -20,6 +21,7 @@ import com.limelight.preferences.AddComputerManually;
 import com.limelight.preferences.GlPreferences;
 import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.preferences.StreamSettings;
+import com.limelight.profiles.ProfilesManager;
 import com.limelight.ui.AdapterFragment;
 import com.limelight.ui.AdapterFragmentCallbacks;
 import com.limelight.utils.Dialog;
@@ -28,7 +30,6 @@ import com.limelight.utils.ServerHelper;
 import com.limelight.utils.ShortcutHelper;
 import com.limelight.utils.UiHelper;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Service;
@@ -37,10 +38,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.view.ContextMenu;
@@ -59,6 +62,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -66,7 +70,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class PcView extends Activity implements AdapterFragmentCallbacks {
+public class PcView extends AppCompatActivity implements AdapterFragmentCallbacks {
     private RelativeLayout noPcFoundLayout;
     private PcGridAdapter pcGridAdapter;
     private ShortcutHelper shortcutHelper;
@@ -116,6 +120,8 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             // Reinitialize views just in case orientation changed
             initializeViews();
         }
+
+        refreshProfileButton();
     }
 
     private final static int PAIR_ID = 2;
@@ -151,6 +157,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
         ImageButton settingsButton = findViewById(R.id.settingsButton);
         ImageButton addComputerButton = findViewById(R.id.manuallyAddPc);
         ImageButton helpButton = findViewById(R.id.helpButton);
+        ExtendedFloatingActionButton profilesButton = findViewById(R.id.profilesButton);
 
         settingsButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -169,6 +176,12 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             @Override
             public void onClick(View v) {
                 HelpLauncher.launchSetupGuide(PcView.this);
+            }
+        });
+        profilesButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(PcView.this, ProfilesActivity.class));
             }
         });
 
@@ -329,6 +342,22 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
         }
     }
 
+    private void refreshProfileButton() {
+        ExtendedFloatingActionButton profilesButton = findViewById(R.id.profilesButton);
+        // User report Samsung and Xiaomi devices have this problem
+        // Why just these two brands have the most problems?
+        if (profilesButton == null) {
+            return;
+        }
+        String activeProfileName = ProfilesManager.getInstance().getActiveName();
+        if (activeProfileName.isEmpty()) {
+            profilesButton.shrink();
+        } else {
+            profilesButton.setText(activeProfileName);
+            profilesButton.extend();
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -344,6 +373,8 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
 
         // Display a decoder crash notification if we've returned after a crash
         UiHelper.showDecoderCrashDialog(this);
+
+        refreshProfileButton();
 
         inForeground = true;
         startComputerUpdates();
@@ -370,7 +401,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
 
         // Call superclass
         super.onCreateContextMenu(menu, v, menuInfo);
-                
+
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         ComputerObject computer = (ComputerObject) pcGridAdapter.getItem(info.position);
 
@@ -746,7 +777,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
                     return true;
                 }
 
-                ServerHelper.doStart(this, new NvApp("app", computer.details.runningGameId, false), computer.details, managerBinder, false);
+                ServerHelper.doStart(this, new NvApp("app", null, computer.details.runningGameId, false), computer.details, managerBinder, false);
                 return true;
 
             case QUIT_ID:
@@ -760,7 +791,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
                     @Override
                     public void run() {
                         ServerHelper.doQuit(PcView.this, computer.details,
-                                new NvApp("app", 0, false), managerBinder, null);
+                                new NvApp("app", null, 0, false), managerBinder, null);
                     }
                 }, null);
                 return true;
@@ -789,7 +820,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
                 return super.onContextItemSelected(item);
         }
     }
-    
+
     private void removeComputer(ComputerDetails details) {
         managerBinder.removeComputer(details);
 
@@ -821,7 +852,7 @@ public class PcView extends Activity implements AdapterFragmentCallbacks {
             }
         }
     }
-    
+
     private void updateComputer(ComputerDetails details) {
         ComputerObject existingEntry = null;
 

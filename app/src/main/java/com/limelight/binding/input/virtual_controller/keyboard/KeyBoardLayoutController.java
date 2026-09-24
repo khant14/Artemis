@@ -6,11 +6,13 @@ package com.limelight.binding.input.virtual_controller.keyboard;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -40,6 +42,7 @@ public class KeyBoardLayoutController {
     private final long timerLongClickTimeout = 300;
     private final Context context;
     private final PreferenceConfiguration prefConfig;
+    private ViewCallbacks viewCallbacks;
     private FrameLayout frame_layout = null;
     private final Handler handler;
     public boolean shown = false;
@@ -85,11 +88,15 @@ public class KeyBoardLayoutController {
     }
 
     private boolean isModifierKey(int keyCode) {
-        return MODIFIER_KEY_CODES.contains(keyCode);
+        if (prefConfig.stickyModifierKey) {
+            return MODIFIER_KEY_CODES.contains(keyCode);
+        }
+
+        return false;
     }
 
     private boolean isSpecialKey(int keyCode) {
-        return SPECIAL_KEY_CODES.contains(keyCode);
+        return SPECIAL_KEY_CODES.contains(keyCode) || MODIFIER_KEY_CODES.contains(keyCode);
     }
 
     public KeyBoardLayoutController(FrameLayout layout, final Context context, PreferenceConfiguration prefConfig) {
@@ -100,6 +107,10 @@ public class KeyBoardLayoutController {
         this.handler = new Handler(Looper.getMainLooper());
         initKeyPopup();
         initKeyboard();
+    }
+
+    public void setViewCallbacks(ViewCallbacks viewCallbacks) {
+        this.viewCallbacks = viewCallbacks;
     }
 
     public Handler getHandler() {
@@ -130,7 +141,7 @@ public class KeyBoardLayoutController {
                     }
 
                     // Key popup
-                    if (!TextUtils.equals("hide", tag) && !_isModifierKey && !_isSpecialKey) {
+                    if (!TextUtils.equals("hide", tag) && !_isSpecialKey) {
                         String popupText;
                         KeyEvent tempEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
                         int unicodeChar = tempEvent.getUnicodeChar(0);
@@ -265,6 +276,10 @@ public class KeyBoardLayoutController {
         hidePopupRunnable = () -> keyPopup.dismiss();
     }
 
+    public boolean isKeyboardVisible() {
+        return keyboardView.getVisibility() == View.VISIBLE;
+    }
+
     public void hide(boolean temporary) {
         if (prefConfig.enableKeyboardVibrate) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -277,6 +292,10 @@ public class KeyBoardLayoutController {
         if (!temporary) {
             shown = false;
         }
+
+        if (viewCallbacks != null) {
+            viewCallbacks.onKeyboardControllerVisibilityChange(false);
+        }
     }
 
     public void hide() {
@@ -286,6 +305,9 @@ public class KeyBoardLayoutController {
     public void show() {
         keyboardView.setVisibility(View.VISIBLE);
         shown = true;
+        if (viewCallbacks != null) {
+            viewCallbacks.onKeyboardControllerVisibilityChange(true);
+        }
     }
 
     public void toggleVisibility() {
@@ -298,12 +320,20 @@ public class KeyBoardLayoutController {
 
     public void refreshLayout() {
         frame_layout.removeView(keyboardView);
-        // DisplayMetrics screen = context.getResources().getDisplayMetrics();
-        // (int)(screen.heightPixels/0.4)/
-        int height = prefConfig.onscreenKeyboardHeight;
-        int widthPreference = prefConfig.onscreenKeyboardWidth;
-        int width = widthPreference == 1000 ? ViewGroup.LayoutParams.MATCH_PARENT : dip2px(context, widthPreference);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, dip2px(context, height));
+
+        int height = 0;
+        int width = 0;
+        int widthPreference = 0;
+        if (prefConfig.onscreenKeyboardAutoFitDisabled) {
+            height = dip2px(context,prefConfig.onscreenKeyboardHeight);
+            widthPreference = prefConfig.onscreenKeyboardWidth;
+            width = widthPreference == 1000 ? ViewGroup.LayoutParams.MATCH_PARENT : dip2px(context, widthPreference);
+        } else {
+            DisplayMetrics screen = context.getResources().getDisplayMetrics();
+            width = screen.widthPixels;
+            height = (int) (screen.heightPixels * 0.5);
+        }
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
         params.gravity = Gravity.BOTTOM;
         switch (prefConfig.onscreenKeyboardAlignMode) {
             case "left": {
@@ -341,5 +371,9 @@ public class KeyBoardLayoutController {
         } else {
             Game.instance.onKey(null, keyEvent.getKeyCode(), keyEvent);
         }
+    }
+
+    public interface ViewCallbacks {
+        void onKeyboardControllerVisibilityChange(boolean visible);
     }
 }

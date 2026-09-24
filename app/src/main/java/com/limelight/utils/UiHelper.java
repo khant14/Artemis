@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.limelight.AppView;
 import com.limelight.Game;
+import com.limelight.LimeLog;
 import com.limelight.R;
 import com.limelight.nvstream.http.ComputerDetails;
 import com.limelight.preferences.PreferenceConfiguration;
@@ -38,6 +39,11 @@ public class UiHelper {
     private static void setGameModeStatus(Context context, boolean streaming, boolean interruptible) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             GameManager gameManager = context.getSystemService(GameManager.class);
+
+            if (gameManager == null) {
+                LimeLog.warning("GameManager is null, maybe your system does not support it?");
+                return;
+            }
 
             if (streaming) {
                 gameManager.setGameState(new GameState(false, interruptible ? GameState.MODE_GAMEPLAY_INTERRUPTIBLE : GameState.MODE_GAMEPLAY_UNINTERRUPTIBLE));
@@ -155,7 +161,7 @@ public class UiHelper {
                     view.setPadding(tappableInsets.left,
                             tappableInsets.top,
                             tappableInsets.right,
-                            0);
+                            tappableInsets.bottom);
 
                     // Show a translucent navigation bar if we can't tap there
                     if (tappableInsets.bottom != 0) {

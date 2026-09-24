@@ -6,6 +6,30 @@
     <string name="scut_pc_not_found"> 电脑未找到 </string>
     <string name="scut_invalid_uuid"> 提供的电脑无效 </string>
     <string name="scut_invalid_app_id"> 提供的App无效 </string>
+
+    <!-- Compliance -->
+    <string name="category_basic_settings">基础设置</string>
+    <string name="title_checkbox_stretch_video">拉伸视频以适应屏幕</string>
+
+    <!-- New/Fully External Display Mode -->
+    <string name="title_fullexdisplay_mode">完全外接显示器模式（Beta）</string>
+    <string name="summary_fullexdisplay_mode">允许全沉浸式副屏模式，自动匹配刷新率和分辨率。此模式下手动设置无效。</string>
+
+    <!-- On-screen Keyboard Autofit -->
+    <string name="title_onscreen_keyboard_autofit">虚拟全键盘禁用自适应</string>
+    <string name="summary_onscreen_keyboard_autofit">不自动调整键盘大小和位置，允许自定义大小</string>
+
+    <!-- External Display Info -->
+    <string name="external_display_info">外接显示器已连接：%1$dx%2$d，%3$.1fHz</string>
+    <string name="notification_channel_name">外接显示器控制</string>
+    <string name="notification_title">外接显示器已激活</string>
+    <string name="notification_text">点击打开触控板控制器</string>
+    <string name="permission_denied">通知权限被拒绝</string>
+    <string name="no_external_display">未检测到外接显示器</string>
+    <string name="no_game_instance">未检测到游戏实例</string>
+
+    <!-- Edit Profile -->
+    <string name="title_edit_profile">编辑配置</string>
     <!-- Help strings -->
     <string name="help_loading_title"> 查看帮助 </string>
     <string name="help_loading_msg"> 正在加载帮助页面…… </string>
@@ -77,7 +101,7 @@
     <string name="ip_hint">串流电脑的IP地址</string>
     <string name="searching_pc">在你的本地网络中搜索串流主机PC...
 \n
-\n 确保Sunshine在主机上运行，或在GeForce Experience SHIELD设置中启用GameStream。</string>
+\n 请确保 Apollo 正在主机上运行。</string>
     <string name="yes"> 确定 </string>
     <string name="no"> 取消 </string>
     <string name="lost_connection"> 与电脑失去连接 </string>
@@ -92,6 +116,7 @@
     <string name="perf_overlay_netdrops">网络丢失帧： %1$.2f%%</string>
     <string name="perf_overlay_dectime">平均解码时间： %1$.2f ms</string>
     <!-- AppList activity -->
+    <string name="toast_no_logs">还没有统计过性能数据</string>
     <string name="applist_connect_msg"> 正在连接电脑…… </string>
     <string name="applist_menu_resume"> 恢复串流 </string>
     <string name="applist_menu_start_vdisplay"> 在虚拟显示器中启动 </string>
@@ -103,6 +128,7 @@
     <string name="applist_menu_cancel"> 取消 </string>
     <string name="applist_menu_details"> 查看详情 </string>
     <string name="applist_menu_scut"> 创建快捷方式 </string>
+    <string name="applist_menu_export_launcher"> 导出启动文件 </string>
     <string name="applist_menu_tv_channel"> 添加到频道 </string>
     <string name="applist_refresh_title"> 游戏列表 </string>
     <string name="applist_refresh_msg"> 刷新中…… </string>
@@ -129,7 +155,9 @@
     <string name="title_fps_list"> 视频帧数 </string>
     <string name="summary_fps_list">高帧数提升视频流流畅度。低帧数提升在低端设备中的串流体验。</string>
     <string name="title_seekbar_bitrate"> 视频码率 </string>
-    <string name="summary_seekbar_bitrate">高码率提升图像质量。低码率提升在较慢网络中的串流体验。</string>
+    <string name="summary_seekbar_bitrate">高码率提升图像质量，低码率提升在较慢网络中的串流体验。</string>
+    <string name="title_seekbar_metered_bitrate">按流量计费网络视频码率</string>
+    <string name="summary_seekbar_metered_bitrate">高码率消耗更多流量，低码率改善在按流量计费网络中的流畅度。\n设0则自动使用上方码率设置的¼。</string>
     <string name="title_resolution_scale_factor">分辨率缩放比例</string>
     <string name="summary_resolution_scale_factor">服务端虚拟屏分辨率将会乘以此比例。串流视频分辨率不受影响。\n例如: 120% 将会使 2000x1000 变成 2400x1200。\n更高的缩放比例在某些游戏中可以改善画质。\n需要 Apollo 才能生效。</string>
     <string name="title_unlock_fps"> 解锁所有可用帧数 </string>
@@ -156,6 +184,8 @@
     <string name="summary_checkbox_usb_bind_all"> 强制 Artemis 的USB驱动接管所有受支持的Xbox/Nintendo Pro手柄 </string>
     <string name="title_checkbox_mouse_emulation"> 通过手柄模拟鼠标 </string>
     <string name="summary_checkbox_mouse_emulation"> 长按开始键将手柄切换为鼠标模式 </string>
+    <string name="title_checkbox_remember_mouse_mode">记住鼠标模式</string>
+    <string name="summary_checkbox_remember_mouse_mode">记住在串流中选择的鼠标模式。禁用时，串流中改变的鼠标模式将是临时的。</string>
     <string name="title_checkbox_mouse_nav_buttons"> 启用前进后退鼠标键 </string>
     <string name="summary_checkbox_mouse_nav_buttons"> 在一些支持不佳的设备上启用此项可能会使其右键失效 </string>
     <string name="title_checkbox_flip_face_buttons"> 反转技能键 </string>
@@ -240,6 +270,7 @@
     <string name="perf_overlay_netlatency">平均网络延迟： %1$d ms (抖动： %2$d ms)</string>
     <string name="perf_overlay_streamdetails">视频流： %1$s %2$.2f FPS</string>
     <string name="resolution_prefix_native_fullscreen">原生全屏</string>
+    <string name="resolution_prefix_custom">自定义</string>
     <!-- Array strings -->
     <string name="audioconf_stereo">立体声</string>
     <string name="audioconf_51surround">5.1环绕声</string>
@@ -292,6 +323,8 @@
 \n尝试禁用 HDR 模式、更改流分辨率或更改主机 PC 的显示分辨率。</string>
     <string name="summary_full_range">如果你的设备无法正确显示全范围视频内容，这会导致明暗区域的细节丢失。</string>
     <string name="title_full_range">强制完全动态范围视频 (实验性)</string>
+    <string name="title_prevent_packet_loss">防止丢包</string>
+    <string name="summary_prevent_packet_loss">对于不明原因丢包的设备，可以尝试开启此选项。</string>
     <string name="pair_pairing_help">如果你的主机运行的是 Sunshine，请前往Sunshine的网页界面输入PIN码。</string>
     <string name="pcview_menu_eol">NVIDIA GameStream 终止服务</string>
     <string name="perf_overlay_hostprocessinglatency">主机处理延迟最小值/最大值/平均值: %1$.1f/%2$.1f/%3$.1f ms</string>
@@ -304,19 +337,25 @@
     <string name="summary_checkbox_gamepad_motion_sensors">使支持的主机能够在模拟具有运动传感器的游戏手柄时请求运动传感器数据。如果在游戏中未使用运动传感器，禁用可能会略微降低电源和网络使用量。</string>
     <string name="videoformat_av1always">首选 AV1（实验性）</string>
     <string name="videoformat_h264always">首选 H.264</string>
+    <string name="title_performance_link">性能统计表</string>
     <string name="toast_controller_type_changed">游戏手柄类型可能会因运动传感器模拟而改变</string>
     <string name="title_special_key_help">自定义按键说明</string>
     <string name="summary_special_key_help">关于如何自定义特殊按键的介绍</string>
     <string name="summary_checkbox_gamepad_motion_fallback">如果你连接的游戏手柄或 Android 版本不支持游戏手柄传感器，请使用设备的内置运动传感器。
 \n注意：启用此选项可能会导致您的游戏手柄在主机上被识别为 PlayStation 4控制器。</string>
     <string name="title_checkbox_gamepad_motion_fallback">模拟游戏手柄运动传感器支持</string>
+    <string name="title_checkbox_force_device_motion">强制使用设备的运动传感器</string>
+    <string name="summary_checkbox_force_device_motion">强制使用设备内置的运动传感器，即使手柄报告支持运动传感器。</string>
+    <string name="title_enable_rumble">启用手柄震动</string>
+    <string name="summary_enable_rumble">为支持的手柄启用震动反馈。</string>
     <string name="error_code_prefix">错误代码:</string>
     <string name="title_seekbar_vibrate_fallback_strength">调整模拟震动强度</string>
     <string name="suffix_seekbar_vibrate_fallback_strength">％</string>
     <string name="keyboard_service_label"> Artemis 物理键盘</string>
     <string name="accessibility_description_text">此功能仅用于外接实体键盘时，某些系统存在特定的键盘快捷键，此情况会影响串流过程中，无法将相关按键指令传输给目标PC。            Artemis 不会观察您输入的文本，也不会收集您的密码、信用卡号或任何其他信息。</string>
     <string name="game_menu_toggle_keyboard">弹出软键盘</string>
-    <string name="game_menu_hud">(显示/隐藏)性能信息</string>
+    <string name="game_menu_toggle_hud">(显示/隐藏)性能信息</string>
+    <string name="game_menu_toggle_floating_button">(显示/隐藏)悬浮按钮</string>
     <string name="game_menu_select_mouse_mode">选择鼠标模式</string>
     <string name="game_menu_enable_zoom_mode">启用平移/缩放</string>
     <string name="game_menu_disable_zoom_mode">禁用平移/缩放</string>
@@ -325,6 +364,7 @@
     <string name="game_menu_toggle_virtual_model">(显示/隐藏)虚拟手柄</string>
     <string name="game_menu_toggle_virtual_keyboard_model">(显示/隐藏)虚拟全键盘</string>
     <string name="game_menu_switch_touch_sensitivity_model">触控灵敏度切换</string>
+    <string name="game_menu_toggle_mouse_off">禁用手柄鼠标模拟</string>
     <string name="game_menu_disconnect">断开连接</string>
     <string name="game_menu_cancel">取消</string>
     <string name="game_menu_task_manager">打开任务管理器</string>
@@ -333,16 +373,17 @@
     <string name="game_menu_send_keys_win">Win</string>
     <string name="game_menu_send_keys_win_d">Win + D (返回桌面)</string>
     <string name="game_menu_send_keys_alt_b">ALT + B (切换HDR)</string>
-    <string name="game_menu_send_keys_win_x_u_s">Win + X ~ U + S (睡眠)</string>
-    <string name="game_menu_send_keys_win_x_u_r">Win + X ~ U + R (重启)</string>
-    <string name="game_menu_send_keys_win_x_u_u">Win + X ~ U + U (关机)</string>
-    <string name="game_menu_send_keys_win_x_u_i">Win + X ~ U + I (注销)</string>
     <string name="game_menu_send_keys_win_g">Win + G (打开Xbox Game Bar)</string>
     <string name="game_menu_send_keys_ctrl_alt_tab">Ctrl + Alt + Tab</string>
     <string name="game_menu_send_keys_shift_tab">Shift + Tab (打开Steam Overlay)</string>
     <string name="game_menu_send_keys_win_shift_left">Win + shift + left (在桌面间移动窗口)</string>
     <string name="game_menu_send_keys_ctrl_alt_shift_q">Ctrl+Alt+Shift+Q (PC退出串流)</string>
     <string name="game_menu_send_keys_ctrl_alt_shift_f1">Ctrl+Alt+Shift+F1 (切换显示器)</string>
+
+    <string name="toggle_pan_zoom_mode">切换平移/缩放模式</string>
+    <string name="pan_zoom_mode_enabled">已启用平移/缩放模式</string>
+    <string name="pan_zoom_mode_disabled">已禁用平移/缩放模式</string>
+
     <string name="title_analog_scrolling">使用摇杆控制鼠标移动</string>
     <string name="analogscroll_left">左摇杆</string>
     <string name="analogscroll_right">右摇杆</string>
@@ -354,23 +395,31 @@
     <string name="title_export_keyboard_layout">导出键盘布局</string>
     <string name="summary_import_keyboard_layout">导入键盘布局配置。会覆盖当前配置。</string>
     <string name="summary_export_keyboard_layout">导出当前设置的键盘布局</string>
-    <string name="title_manual_enter_bitrate">手动输入码率</string>
-    <string name="summary_manual_enter_bitrate">手动输入码率，可以超过滑动条选项的极限。</string>
+    <string name="title_manual_enter_bitrate">自定义码率</string>
+    <string name="summary_manual_enter_bitrate">手动输入码率，可以超过滑动条选项的上限。</string>
     <string name="dialog_manual_enter_bitrate">以 Mbps 输入码率。以0.5为限四舍五入。</string>
+    <string name="title_custom_refresh_rate">自定义刷新率</string>
+    <string name="summary_custom_refresh_rate">手动输入刷新率。仅支持Apollo。</string>
+    <string name="dialog_custom_refresh_rate">输入刷新率，单位为 Hz。可以是小数。</string>
     <string name="title_touchscreen_mode">触摸屏鼠标模拟方式</string>
     <string name="summary_touchscreen_mode">选择多点触控/单点触控/触摸板/禁用。\n禁用时手写笔仍可使用。\n在使用外接屏幕时强制为触摸板(自然)模式。</string>
     <string name="title_checkbox_mouse_local_cursor">使用本地鼠标光标</string>
     <string name="summary_checkbox_mouse_local_cursor">默认外接物理鼠标的光标会被捕获，此选项可显示安卓系统光标</string>
+    <string name="title_checkbox_multi_touch_gestures">多点触控手势</string>
+    <string name="summary_checkbox_multi_touch_gestures">开启后，可在多点触控时使用三指唤出键盘、四指唤出全键盘、五指唤出快捷菜单。</string>
     <string name="title_checkbox_onscreen_style_official">官方虚拟手柄皮肤</string>
     <string name="summary_checkbox_onscreen_style_official">如果你还是喜欢官方旧版虚拟手柄按键风格可以勾选此选项。\n按键形状可以为方形，如果你勾选了底部虚拟按键【普通按钮为方形按钮】</string>
     <string name="title_checkbox_enable_perf_overlay_lite">开启Lite精简模式</string>
     <string name="summary_checkbox_enable_perf_overlay_lite">展示简化版性能信息：网速/延迟/解码/丢包率/FPS</string>
+    <string name="title_checkbox_enable_perf_logging">启用性能数据统计</string>
+    <string name="summary_checkbox_enable_perf_logging">存储性能记录（仅本地）</string>
     <string name="title_checkbox_enable_perf_overlay_lite_dialog">Lite精简模式点击弹出快捷选项</string>
     <string name="summary_checkbox_enable_perf_overlay_lite_dialog">代替返回键逻辑，弹出游戏快捷菜单。</string>
     <string name="title_virtual_trackpad_settings">虚拟触摸板设置</string>
     <string name="title_quit_dialog">返回菜单</string>
-    <string name="summary_quit_dialog">开启后，串流界面点击手机返回键 展示相关选项！
-            \n软键盘、性能信息、触控模式切换、发送特殊按键</string>
+    <string name="summary_quit_dialog">启用返回菜单</string>
+    <string name="title_floating_button">悬浮按钮</string>
+    <string name="summary_floating_button">启用悬浮按钮</string>
     <string name="dialog_custom_resolution">设置完分辨率后，退出设置页面 重新打开生效！</string>
     <string name="summary_custom_resolution">添加一个自定义分辨率,x号分割,比较奇怪的分辨率可能无法生效。
             \n例如：1920x1080
@@ -418,6 +467,7 @@
     <string name="summary_clear_default_special_button">如果你感觉返回菜单内置的指令对你没什么用的话，可以禁用，只使用自己导入的。</string>
     <string name="title_import_special_button">导入自定义按键</string>
     <string name="summary_import_special_button">在返回菜单及特殊按键中可用。\n注意：导入会覆盖当前配置，请注意备份。</string>
+    <string name="title_share_performance_logs_button">分享性能统计信息</string>
     <string name="title_software_update">软件更新</string>
     <string name="summary_software_update">ClassicOldSong 黑月光修改版 - 访问 GitHub Release 以获取更新</string>
     <string name="title_follow_update">订阅更新</string>
@@ -465,14 +515,19 @@
     <string name="perf_overlay_lite_bandwidth">带宽</string>
     <string name="perf_overlay_lite_network_decoding_delay">网络/解码延迟</string>
     <string name="perf_overlay_lite_packet_loss">丢包率</string>
+    <string name="menu_button">菜单</string>
     <string name="quick_menu_title">快捷菜单</string>
     <string name="wrong_import_format">自定义导入格式错误，请检查！</string>
     <string name="title_checkbox_gamepad_enable_battery_report">启用手柄电池状态报告</string>
     <string name="summary_checkbox_gamepad_enable_battery_report">在可用时汇报手柄电池状态。\n如果在使用触摸屏/触摸板/手写笔/鼠标时偶尔有卡顿现象发生，关闭此选项可能会有用。</string>
     <string name="title_checkbox_enforce_display_mode">强制设置显示模式</string>
     <string name="summary_checkbox_enforce_display_mode">强制使用最佳显示模式。\n在某些系统(如ColorOS等)上必须启用才能正确设置刷新率/分辨率。\n请勿在ChromeCast 4K上启用此选项，可能会导致bug。</string>
+    <string name="title_checkbox_ultra_low_latency">超低延迟（实验性）</string>
+    <string name="summary_checkbox_ultra_low_latency">仅对高通8Gen2/8(s)Gen3/8Elite有效。</string>
     <string name="title_checkbox_use_virtual_display">使用虚拟显示器</string>
     <string name="summary_checkbox_use_virtual_display">默认使用虚拟显示器。\n虚拟显示器可以自动匹配设备端的分辨率与刷新率设置，提供无缝的串流体验。\n需要使用 Apollo 作为服务端串流软件。</string>
+    <string name="title_checkbox_enable_sticky_modifier_key_virtual_keyboard">粘滞修饰键</string>
+    <string name="summary_checkbox_enable_sticky_modifier_key_virtual_keyboard">在虚拟全键盘以及自定义键盘上使用粘滞修饰键。</string>
     <string name="title_checkbox_resume_without_confirm">快速恢复</string>
     <string name="summary_checkbox_resume_without_confirm">在点击恢复按钮时不弹出菜单，直接恢复串流。</string>
     <string name="virtual_keyboard_hide">隐藏\n键盘</string>
@@ -532,7 +587,7 @@
     <string name="game_menu_fetch_clipboard">获取剪贴板</string>
     <string name="game_menu_upload_clipboard">上传剪贴板</string>
     <string name="game_dialog_title_server_cmd_empty">无服务端命令</string>
-    <string name="game_dialog_message_server_cmd_empty">请确保你的服务端为 Apollo，并已授予此客户端“服务端命令”权限。</string>
+    <string name="game_dialog_message_server_cmd_empty">请确保你的服务端为 Apollo，并已授予此客户端"服务端命令"权限。</string>
     <string name="vdisplay_not_ready">服务端虚拟显示器驱动未就绪。请确保 SudoVDA 驱动已正确安装并启用。</string>
     <string name="vdisplay_not_supported"><![CDATA[此服务端不支持虚拟显示器。请使用 <a href=\"https://github.com/ClassicOldSong/Apollo\">Apollo</a> 作为服务端串流软件。]]></string>
     <string name="clipboard_sync_unsupported">此服务器不支持剪贴板同步，请安装或升级服务端至最新的 Apollo。</string>
@@ -558,4 +613,106 @@
     <string name="searchpreference_more">更多</string>
     <string name="searchpreference_clear_history">清除历史</string>
     <string name="searchpreference_no_results">无结果</string>
+    <string name="game_menu_toggle_mouse_on">启用手柄鼠标模拟</string>
+    <string name="summary_performance_link">查看其他设备的性能数据</string>
+    <string name="email_chooser_title">发送性能统计...</string>
+    <string name="toast_no_email_clients">找不到电子邮件客户端</string>
+    <string name="email_subject">Artemistics - 性能统计</string>
+    <string name="summary_share_performance_logs">与朋友或社区分享你的性能统计数据</string>
+    <string name="email_prefix_message">"\n        请按原样将此邮件发送至 artemistics.logs@gmail.com 以帮助社区。\n\n        您分享的性能数据将会帮助改进和扩充以下地址的统计数据：\n\n        https://tinyurl.com/artemis-performance\n\n\n    "</string>
+
+    <!-- Keyboard -->
+    <string name="keyboard_clear_all">清除全部</string>
+    <string name="keyboard_add_keys">添加按键</string>
+    <string name="keyboard_select_keys">选择要添加的按键</string>
+    <string name="keyboard_clear_all_confirm_title">清除全部按键</string>
+    <string name="keyboard_clear_all_confirm_message">确定要移除全部按键吗？</string>
+    <string name="keyboard_add">添加</string>
+    <string name="keyboard_configure_movable">设置按钮已可移动</string>
+    <string name="keyboard_keys_added">%d 个按键已成功添加</string>
+    <string name="keyboard_duplicates_skipped">%d 个重复按键已跳过</string>
+    <string name="keyboard_load_error">加载键盘配置错误：%s</string>
+    <string name="keyboard_key_custom">%s （自定义）</string>
+
+    <!-- ShortcutHelper Toast Messages -->
+    <string name="export_launcher_computer_details_incomplete">无法导出：电脑详情不完整。</string>
+    <string name="export_launcher_app_details_incomplete">无法导出：应用详情不完整。</string>
+    <string name="failed_to_initiate_file_export">无法初始化文件导出：%s</string>
+    <string name="file_export_failed_no_location_selected">文件导出失败：未选择位置。</string>
+    <string name="file_export_failed_no_content_to_write">文件导出失败：没有内容可写。</string>
+    <string name="file_exported_successfully">文件导出成功。</string>
+    <string name="failed_to_open_file_for_writing">无法打开文件进行写入。</string>
+    <string name="error_writing_file">写入文件时出错：%s</string>
+    <string name="unexpected_error_during_file_export">文件导出期间发生意外错误。</string>
+
+    <!-- AppView Toast Messages -->
+    <string name="file_export_cancelled">文件导出已取消。</string>
+    <string name="app_removed_from_pc">应用已从电脑上移除</string>
+
+    <string name="title_export_sunshine_launcher_file">为 Sunshine 导出启动文件</string>
+    <string name="message_export_sunshine_launcher_file">为 Sunsihne 导出启动文件不稳定且随时可能失效。你需要在每次修改 APP 名称或图片以后重新导出。\n使用 Apollo 可获得更稳定的体验。</string>
+    <string name="title_enable_commit_text">启用 Commit-Text 输入（滑动/语音）</string>
+    <string name="summary_enable_commit_text">转发来自屏幕键盘的多字符文本（输入法词组、滑动输入、词语预测、语音输入）。可能会影响依赖逐键输入的游戏。</string>
+    <string name="title_show_overlay_zoom_toggle_button">显示缩放悬浮按钮</string>
+    <string name="summary_show_overlay_zoom_toggle_button">在屏幕上显示一个悬浮按钮以切换拖拽/缩放模式</string>
+    <string name="title_checkbox_remember_zoom_pan">记住缩放及位置</string>
+    <string name="summary_checkbox_remember_zoom_pan">在不同会话间记住缩放及位置</string>
+    <string name="title_checkbox_enable_perf_overlay_bottom">移动性能信息至底部</string>
+    <string name="summary_checkbox_enable_perf_overlay_bottom">当串流分辨率非本地原生且启用了画面顶部居中显示时有用。</string>
+    <string name="profile_manager_new_profile">新配置</string>
+    <string name="profile_manager_profile_not_found">配置未找到</string>
+    <string name="profile_manager_edit_profile">编辑配置：</string>
+    <string name="profile_manager_profile">配置</string>
+    <string name="profile_manager_profile_saved">配置 %s 已保存</string>
+    <string name="profile_manager_edit_profile_name">编辑配置名称</string>
+    <string name="profile_manager_name_cannot_be_blank">名称不能为空</string>
+    <string name="profile_manager_edit_profile_with">编辑配置：%s</string>
+    <string name="profile_manager_new_profile_with">新配置：%s</string>
+    <string name="profile_manager_no_profiles_yet">尚无配置</string>
+    <string name="profile_manager_profiles_description">配置文件允许您创建并保存不同的串流配置。每个配置文件都存储各自的设置，可以快速切换。</string>
+    <string name="profile_manager_tap_create_profile">点击 + 以创建您的第一个配置文件</string>
+    <string name="profile_manager_choose_profile">选择配置</string>
+    <string name="profile_manager_deactivated_profile">配置已停用</string>
+    <string name="profile_manager_activated_profile">已激活配置 %s</string>
+    <string name="profile_manager_delete_profile">删除配置</string>
+    <string name="profile_manager_confirm_profile_deleteion">确认要删除配置 %s 吗?</string>
+    <string name="profile_manager_delete">删除</string>
+    <string name="profile_manager_profile_deleted">配置 %s 已删除</string>
+    <string name="profile_manager_failed_to_save">配置保存失败，请检查 logcat 以获取详细信息。</string>
+    <string name="profile_manager_failed_to_load">配置加载失败，请检查 logcat 以获取详细信息。</string>
+    <string name="profile_manager_active_profile">当前配置：%s</string>
+    <string name="rename">重命名</string>
+    <string name="save">保存</string>
+
+    <!-- Performance Charts and Monitor -->
+    <string name="category_perf_monitor_settings">性能监视器</string>
+
+    <!-- Low-latency frame balance (LFR) -->
+    <string name="title_low_latency_frame_balance">低延迟队列（实验性）</string>
+    <string name="summary_low_latency_frame_balance">通过丢弃缓冲帧以最小化延迟。</string>
+
+    <!-- Tight Vsync -->
+    <string name="title_checkbox_forceTightThresholds">紧凑 VSync（实验性）</string>
+    <string name="summary_checkbox_forceTightThresholds">更紧凑的 VSync 阈值以降低延迟；可能增加丢帧。</string>
+
+    <!-- Added/translated missing strings -->
+    <string name="perf_overlay_drawdelay">延迟：%1$.2f ms</string>
+    <string name="game_menu_select_steam_mode">选择串流模式</string>
+    <string name="perf_overlay_drawn_fps">GPU 帧率：</string>
+    <string name="perf_overlay_ai_fps">3D 帧率：</string>
+    <string name="perf_overlay_ai_delegate">AI 后端：</string>
+    <string name="title_render_mode">渲染模式</string>
+    <string name="title_render_mode_convergence_title">3D 会聚</string>
+    <string name="title_render_mode_convergence_description">参考值：50 - 平衡 / 0：屏幕前 / 100：屏幕后</string>
+    <string name="title_render_mode_balance_shift_title">3D 视觉平衡</string>
+    <string name="title_render_mode_balance_shift_description">参考值：50 - 双眼各分担 50% 的深度效果；0：左眼（100% 凸出）- 右眼（100% 不变）；100：左眼不变 - 右眼凸出。将数值设为 0 或 100 可获得更清晰的成像，因为中总有一侧像素保持未偏移。</string>
+    <string name="title_render_mode_strength_title">3D 效果强度</string>
+    <string name="title_render_mode_strength_description">参考值 50。数值越高效果越强，但可能更累眼且不自然；数值越低更护眼，体验更柔和。</string>
+    <string name="summary_render_mode">2D（默认） 或 SBS 3D。3D 会将画面宽度加倍并使用 AI 自动 2D 转 3D。</string>
+    <string name="render_mode_2d">2D</string>
+    <string name="render_mode_3d_sbs">AI SBS 3D</string>
+    <string name="render_mode_3d_sbs_movie">AI SBS 3D 电影模式（同步）</string>
+
+    <string name="title_checkbox_full_screen">启用全屏</string>
+    <string name="summary_checkbox_full_screen">使用沉浸模式隐藏系统状态栏</string>
 </resources>

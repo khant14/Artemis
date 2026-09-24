@@ -7,6 +7,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.limelight.Game;
+import com.limelight.LimeLog;
 import com.limelight.preferences.PreferenceConfiguration;
 
 public class PanZoomHandler {
@@ -24,9 +25,10 @@ public class PanZoomHandler {
     private float parentWidth, parentHeight = 0;
     private float childWidth, childHeight = 0;
 
-    public PanZoomHandler(Context context, Game game, View streamView, PreferenceConfiguration prefConfig) {
+    public PanZoomHandler(Context context, Game game, View streamView, View parent, PreferenceConfiguration prefConfig) {
         this.game = game;
         this.streamView = streamView;
+        this.parent = parent;
         this.prefConfig = prefConfig;
         this.isTopMode = prefConfig.alignDisplayTopCenter;
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
@@ -153,4 +155,19 @@ public class PanZoomHandler {
             return true;
         }
     }
+
+    public void setInitialZoomAndPan(float scale, float offsetX, float offsetY) {
+        this.scaleFactor = scale;
+        // apply to view
+        streamView.setScaleX(scaleFactor);
+        streamView.setScaleY(scaleFactor);
+        this.childX = offsetX;
+        this.childY = offsetY;
+        streamView.setX(childX);
+        streamView.setY(childY);
+    }
+
+    public float getScaleFactor() { return scaleFactor; }
+    public float getChildX() { return childX; }
+    public float getChildY() { return childY; }
 }
