@@ -19,6 +19,7 @@ import com.limelight.R;
 import com.limelight.nvstream.av.video.VideoDecoderRenderer;
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.preferences.PreferenceConfiguration;
+import com.limelight.utils.StreamThreadTuner;
 import com.limelight.utils.TrafficStatsHelper;
 
 import android.annotation.TargetApi;
@@ -1056,12 +1057,23 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         rendererThread = new Thread() {
             @Override
             public void run() {
+                StreamThreadTuner.tuneCurrentThread("Renderer", prefs.preferPerformanceCores);
+                boolean nativeThreadsTuned = false;
+
                 BufferInfo info = new BufferInfo();
                 while (!stopping) {
                     try {
                         // Try to output a frame
                         int outIndex = videoDecoder.dequeueOutputBuffer(info, 50000);
                         if (outIndex >= 0) {
+                            if (!nativeThreadsTuned) {
+                                // All native streams are running once the first frame is decoded.
+                                // VideoRecv submits decode units directly for direct-submit decoders.
+                                StreamThreadTuner.tuneNamedThreads(prefs.preferPerformanceCores,
+                                        "VideoRecv", "VideoDec", "InputSend");
+                                nativeThreadsTuned = true;
+                            }
+
                             long presentationTimeUs = info.presentationTimeUs;
                             int lastIndex = outIndex;
 
@@ -1156,7 +1168,6 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
         };
         rendererThread.setName("Video - Renderer (MediaCodec)");
-        rendererThread.setPriority(Thread.NORM_PRIORITY + 2);
         rendererThread.start();
     }
 

@@ -270,6 +270,8 @@
     <string name="summary_unlock_fps">Streaming at 90 or 120 FPS may reduce latency on high-end devices but can cause lag or instability on devices that can\'t support it</string>
     <string name="title_checkbox_reduce_refresh_rate">Allow refresh rate reduction</string>
     <string name="summary_checkbox_reduce_refresh_rate">Lower display refresh rates can save power at the expense of some additional video latency</string>
+    <string name="title_checkbox_prefer_performance_cores">Prefer performance CPU cores</string>
+    <string name="summary_checkbox_prefer_performance_cores">Restrict video and input streaming threads to the fastest CPU cluster. May reduce latency jitter on big.LITTLE devices (e.g. MediaTek)</string>
     <string name="title_checkbox_disable_warnings">Disable warning messages</string>
     <string name="summary_checkbox_disable_warnings">Disable on-screen connection warning messages while streaming</string>
     <string name="title_disable_frame_drop">Never drop frames</string>

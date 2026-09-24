@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <Limelight.h>
 
 #include <jni.h>
@@ -5,6 +6,9 @@
 
 #include <arpa/inet.h>
 #include <string.h>
+#include <stdio.h>
+#include <sched.h>
+#include <unistd.h>
 
 #include "minisdl.h"
 #include "controller_type.h"
@@ -264,4 +268,76 @@ JNIEXPORT jboolean JNICALL
 Java_com_limelight_nvstream_jni_MoonBridge_guessControllerHasShareButton(JNIEnv *env, jclass clazz, jint vendorId, jint productId) {
     // Xbox Elite and DualSense Edge controllers have paddles
     return SDL_IsJoystickXboxSeriesX(vendorId, productId);
+}
+// Restricts the given thread (of this process) to the CPU cluster with the highest max frequency.
+// This is a soft mask over the whole big cluster, not a pin to a single core.
+JNIEXPORT jboolean JNICALL
+Java_com_limelight_nvstream_jni_MoonBridge_setThreadAffinityToBigCluster(JNIEnv *env, jclass clazz, jint tid) {
+    long maxFreqs[CPU_SETSIZE];
+    long bestFreq = 0;
+    int cpuCount = (int)sysconf(_SC_NPROCESSORS_CONF);
+    cpu_set_t mask;
+    int bigCount = 0;
+
+    if (cpuCount <= 0 || cpuCount > CPU_SETSIZE) {
+        return JNI_FALSE;
+    }
+
+    for (int i = 0; i < cpuCount; i++) {
+        char path[96];
+        FILE* f;
+
+        maxFreqs[i] = 0;
+        snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
+        f = fopen(path, "r");
+        if (f != NULL) {
+            if (fscanf(f, "%ld", &maxFreqs[i]) != 1) {
+                maxFreqs[i] = 0;
+            }
+            fclose(f);
+        }
+        if (maxFreqs[i] > bestFreq) {
+            bestFreq = maxFreqs[i];
+        }
+    }
+
+    if (bestFreq == 0) {
+        return JNI_FALSE;
+    }
+
+    // If the fastest cluster is a single prime core, also allow the next cluster
+    // so the scheduler is never forced onto one core.
+    long minFreq = bestFreq;
+    int bestCount = 0;
+    for (int i = 0; i < cpuCount; i++) {
+        if (maxFreqs[i] == bestFreq) {
+            bestCount++;
+        }
+    }
+    if (bestCount == 1) {
+        long secondFreq = 0;
+        for (int i = 0; i < cpuCount; i++) {
+            if (maxFreqs[i] < bestFreq && maxFreqs[i] > secondFreq) {
+                secondFreq = maxFreqs[i];
+            }
+        }
+        if (secondFreq > 0) {
+            minFreq = secondFreq;
+        }
+    }
+
+    CPU_ZERO(&mask);
+    for (int i = 0; i < cpuCount; i++) {
+        if (maxFreqs[i] >= minFreq) {
+            CPU_SET(i, &mask);
+            bigCount++;
+        }
+    }
+
+    // Nothing to gain if every core is in the same cluster
+    if (bigCount == cpuCount) {
+        return JNI_FALSE;
+    }
+
+    return sched_setaffinity(tid, sizeof(mask), &mask) == 0 ? JNI_TRUE : JNI_FALSE;
 }

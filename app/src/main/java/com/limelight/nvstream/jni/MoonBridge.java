@@ -352,6 +352,8 @@ public class MoonBridge {
 
     public static native void stopConnection();
 
+    public static native boolean setThreadAffinityToBigCluster(int tid);
+
     public static native void interruptConnection();
 
     public static native void sendExecServerCmd(int cmdId);

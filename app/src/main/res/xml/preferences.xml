@@ -766,6 +766,12 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="checkbox_prefer_performance_cores"
+            android:summary="@string/summary_checkbox_prefer_performance_cores"
+            android:title="@string/title_checkbox_prefer_performance_cores"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="checkbox_full_range"
             android:summary="@string/summary_full_range"
             android:title="@string/title_full_range"

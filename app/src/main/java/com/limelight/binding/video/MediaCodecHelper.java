@@ -3,10 +3,13 @@ package com.limelight.binding.video;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +46,8 @@ public class MediaCodecHelper {
     private static final List<String> kirinDecoderPrefixes;
     private static final List<String> exynosDecoderPrefixes;
     private static final List<String> amlogicDecoderPrefixes;
+    private static final List<String> mediatekDecoderPrefixes;
+    private static final Map<String, List<String>> vendorLowLatencyParamCache = new HashMap<>();
     private static final List<String> knownVendorLowLatencyOptions;
 
     public static final boolean SHOULD_BYPASS_SOFTWARE_BLOCK =
@@ -251,6 +256,13 @@ public class MediaCodecHelper {
         amlogicDecoderPrefixes.add("c2.amlogic"); // Unconfirmed
     }
 
+    static {
+        mediatekDecoderPrefixes = new LinkedList<>();
+
+        mediatekDecoderPrefixes.add("omx.mtk");
+        mediatekDecoderPrefixes.add("c2.mtk");
+    }
+
     private static boolean isPowerVR(String glRenderer) {
         return glRenderer.toLowerCase().contains("powervr");
     }
@@ -448,7 +460,33 @@ public class MediaCodecHelper {
         return false;
     }
 
-    private static boolean decoderSupportsKnownVendorLowLatencyOption(String decoderName) {
+    private static boolean isVendorLowLatencyParam(String decoderName, String param) {
+        for (String knownLowLatencyOption : knownVendorLowLatencyOptions) {
+            if (param.equalsIgnoreCase(knownLowLatencyOption)) {
+                return true;
+            }
+        }
+
+        // MediaTek C2 low latency parameter names vary between platforms, so match them by name
+        if (isDecoderInList(mediatekDecoderPrefixes, decoderName)) {
+            String lower = param.toLowerCase(Locale.ROOT);
+            return lower.startsWith("vendor.") &&
+                    (lower.contains("low-latency") || lower.contains("lowlatency") || lower.contains("low_latency"));
+        }
+
+        return false;
+    }
+
+    // Returns the supported vendor low latency parameters for this decoder. The result is cached
+    // since probing requires creating a codec instance.
+    private static synchronized List<String> getVendorLowLatencyParams(String decoderName) {
+        List<String> cached = vendorLowLatencyParamCache.get(decoderName);
+        if (cached != null) {
+            return cached;
+        }
+
+        List<String> params = new ArrayList<>();
+
         // It's only possible to probe vendor parameters on Android 12 and above.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaCodec testCodec = null;
@@ -456,13 +494,13 @@ public class MediaCodecHelper {
                 // Unfortunately we have to create an actual codec instance to get supported options.
                 testCodec = MediaCodec.createByCodecName(decoderName);
 
-                // See if any of the vendor parameters match ones we know about
-                for (String supportedOption : testCodec.getSupportedVendorParameters()) {
-                    for (String knownLowLatencyOption : knownVendorLowLatencyOptions) {
-                        if (supportedOption.equalsIgnoreCase(knownLowLatencyOption)) {
-                            LimeLog.info(decoderName + " supports known low latency option: " + supportedOption);
-                            return true;
-                        }
+                List<String> supportedParams = testCodec.getSupportedVendorParameters();
+                LimeLog.info(decoderName + " vendor parameters: " + supportedParams);
+
+                for (String supportedOption : supportedParams) {
+                    if (isVendorLowLatencyParam(decoderName, supportedOption)) {
+                        LimeLog.info(decoderName + " supports low latency option: " + supportedOption);
+                        params.add(supportedOption);
                     }
                 }
             } catch (Exception e) {
@@ -474,7 +512,13 @@ public class MediaCodecHelper {
                 }
             }
         }
-        return false;
+
+        vendorLowLatencyParamCache.put(decoderName, params);
+        return params;
+    }
+
+    private static boolean decoderSupportsKnownVendorLowLatencyOption(String decoderName) {
+        return !getVendorLowLatencyParams(decoderName).isEmpty();
     }
 
     private static boolean decoderSupportsMaxOperatingRate(String decoderName) {
@@ -492,11 +536,47 @@ public class MediaCodecHelper {
                 !isAdreno620;
     }
 
+    // Raises the decode clock on MediaTek C2 decoders. A realistic rate is used instead of
+    // Short.MAX_VALUE, which is known to crash non-Qualcomm decoders when paired with KEY_PRIORITY.
+    private static boolean setMediatekOperatingRate(MediaFormat videoFormat, String decoderName) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                !decoderName.toLowerCase(Locale.ROOT).startsWith("c2.mtk")) {
+            return false;
+        }
+
+        int fps = 60;
+        if (videoFormat.containsKey(MediaFormat.KEY_FRAME_RATE)) {
+            try {
+                fps = videoFormat.getInteger(MediaFormat.KEY_FRAME_RATE);
+            } catch (ClassCastException e) {
+                fps = (int) videoFormat.getFloat(MediaFormat.KEY_FRAME_RATE);
+            }
+        }
+
+        videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Math.min(Math.max(fps * 2, 120), 240));
+        videoFormat.setInteger(MediaFormat.KEY_PRIORITY, 0);
+        return true;
+    }
+
     public static boolean setDecoderLowLatencyOptions(MediaFormat videoFormat, MediaCodecInfo decoderInfo, int tryNumber) {
         // Options here should be tried in the order of most to least risky. The decoder will use
         // the first MediaFormat that doesn't fail in configure().
 
         boolean setNewOption = false;
+        boolean isMediatek = isDecoderInList(mediatekDecoderPrefixes, decoderInfo.getName());
+
+        if (tryNumber < 1 && isMediatek) {
+            // MediaTek C2 decoders ignore vdec-lowlatency (OMX-only) and may advertise
+            // FEATURE_LowLatency, which returns early below. Apply the probed vendor
+            // low latency parameters and a boosted operating rate on the first try.
+            for (String param : getVendorLowLatencyParams(decoderInfo.getName())) {
+                videoFormat.setInteger(param, 1);
+                setNewOption = true;
+            }
+            if (setMediatekOperatingRate(videoFormat, decoderInfo.getName())) {
+                setNewOption = true;
+            }
+        }
 
         if (tryNumber < 1) {
             // Official Android 11+ low latency option (KEY_LOW_LATENCY).
@@ -532,6 +612,9 @@ public class MediaCodecHelper {
         if (tryNumber < 3) {
             if (MediaCodecHelper.decoderSupportsMaxOperatingRate(decoderInfo.getName())) {
                 videoFormat.setInteger(MediaFormat.KEY_OPERATING_RATE, Short.MAX_VALUE);
+                setNewOption = true;
+            }
+            else if (setMediatekOperatingRate(videoFormat, decoderInfo.getName())) {
                 setNewOption = true;
             }
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
