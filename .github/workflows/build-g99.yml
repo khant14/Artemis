@@ -46,7 +46,7 @@ jobs:
           ARTEMIS_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'android' }}
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleNonRoot_gameRelease -PdeviceTarget=g99
+          ./gradlew --no-daemon assembleNonRoot_gameRelease -PdeviceTarget=g99 -PbuildNumber=${{ github.run_number }}
 
       - uses: actions/upload-artifact@v4
         with:
