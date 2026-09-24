@@ -24,6 +24,10 @@ android {
             // MediaTek Helio G99 (Cortex-A76 + A55) handhelds such as the AYANEO Pocket Micro
             applicationIdSuffix ".g99"
             versionNameSuffix "-g99.${project.findProperty('buildNumber') ?: 'local'}"
+            if (project.hasProperty('buildNumber')) {
+                // Unique, increasing version code per CI build
+                versionCode = 100000 + (project.findProperty('buildNumber') as Integer)
+            }
             externalNativeBuild {
                 ndkBuild {
                     arguments "DEVICE_TARGET=g99"
