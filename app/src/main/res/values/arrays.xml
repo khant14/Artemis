@@ -123,11 +123,13 @@
         <item>@string/mtk_tweak_threads</item>
         <item>@string/mtk_tweak_vendor</item>
         <item>@string/mtk_tweak_oprate</item>
+        <item>@string/mtk_tweak_touchboost</item>
     </string-array>
     <string-array name="mtk_latency_tweak_values" translatable="false">
         <item>threads</item>
         <item>vendor</item>
         <item>oprate</item>
+        <item>touchboost</item>
     </string-array>
 
     <string-array name="video_frame_pacing_names">

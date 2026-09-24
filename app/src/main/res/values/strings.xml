@@ -303,6 +303,7 @@
     <string name="mtk_tweak_threads">Boost streaming thread priority</string>
     <string name="mtk_tweak_vendor">MediaTek vendor low-latency keys (also enables RFI)</string>
     <string name="mtk_tweak_oprate">MediaTek decoder clock boost (operating rate)</string>
+    <string name="mtk_tweak_touchboost">Keep touch boost active (synthetic taps, uses more battery)</string>
     <string name="title_checkbox_prefer_performance_cores">Prefer performance CPU cores</string>
     <string name="summary_checkbox_prefer_performance_cores">Restrict video and input streaming threads to the fastest CPU cluster. May reduce latency jitter on big.LITTLE devices (e.g. MediaTek)</string>
     <string name="title_checkbox_disable_warnings">Disable warning messages</string>

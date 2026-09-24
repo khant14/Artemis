@@ -51,6 +51,7 @@ import com.limelight.utils.PerformanceDataTracker;
 import com.limelight.utils.ServerHelper;
 import com.limelight.utils.ShortcutHelper;
 import com.limelight.utils.SpinnerDialog;
+import com.limelight.utils.TouchBoostKeeper;
 import com.limelight.utils.UiHelper;
 
 import android.annotation.SuppressLint;
@@ -177,6 +178,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     private KeyBoardLayoutController keyBoardLayoutController;
 
     private PreferenceConfiguration prefConfig;
+    private TouchBoostKeeper touchBoostKeeper;
     private SharedPreferences tombstonePrefs;
 
     private int displayWidth;
@@ -3436,10 +3438,26 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
     public void stageComplete(String stage) {
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (touchBoostKeeper != null) {
+            if (touchBoostKeeper.isSynthetic(ev)) {
+                // Synthetic tap used only to keep the SoC touch boost active
+                return true;
+            }
+            touchBoostKeeper.onRealTouch(ev);
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     private void stopConnection() {
         if (connecting || connected) {
             connecting = connected = false;
             updatePipAutoEnter();
+
+            if (touchBoostKeeper != null) {
+                touchBoostKeeper.stop();
+            }
 
             controllerHandler.stop();
 
@@ -3671,6 +3689,13 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 connected = true;
                 connecting = false;
                 updatePipAutoEnter();
+
+                if (prefConfig.mtkTweakTouchBoost) {
+                    if (touchBoostKeeper == null) {
+                        touchBoostKeeper = new TouchBoostKeeper();
+                    }
+                    touchBoostKeeper.start();
+                }
 
                 // Hide the mouse cursor now after a short delay.
                 // Doing it before dismissing the spinner seems to be undone
