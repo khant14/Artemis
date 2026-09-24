@@ -21,6 +21,7 @@ import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.utils.StreamThreadTuner;
 import com.limelight.utils.FsrRenderer;
+import com.limelight.utils.RootClockBoost;
 import com.limelight.utils.Stereo3DRenderer;
 import com.limelight.utils.TrafficStatsHelper;
 
@@ -1833,6 +1834,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     if (FsrRenderer.isActive) {
                         sb.append(String.format(java.util.Locale.US, " FSR: %.1fms", FsrRenderer.drawDelayMs));
                     }
+                    String rootClocks = RootClockBoost.status;
+                    if (rootClocks != null) {
+                        sb.append('\n').append(rootClocks);
+                    }
                     if(Stereo3DRenderer.isActive) {
                         sb.append(" ");
                         sb.append(context.getString(R.string.perf_overlay_ai_fps));
@@ -1864,6 +1869,10 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         sb.append(context.getString(R.string.perf_overlay_streamdetails, initialWidth + "x" + initialHeight, fps.totalFps));
                         if (FsrRenderer.isActive) {
                             sb.append(String.format(java.util.Locale.US, " | FSR delay: %.2f ms", FsrRenderer.drawDelayMs));
+                        }
+                        String rootClocks = RootClockBoost.status;
+                        if (rootClocks != null) {
+                            sb.append('\n').append(rootClocks);
                         }
                     }
                     sb.append('\n');

@@ -50,6 +50,7 @@ import com.limelight.utils.PanZoomHandler;
 import com.limelight.utils.PerformanceDataTracker;
 import com.limelight.utils.ServerHelper;
 import com.limelight.utils.ShortcutHelper;
+import com.limelight.utils.RootClockBoost;
 import com.limelight.utils.SpinnerDialog;
 import com.limelight.utils.TouchBoostKeeper;
 import com.limelight.utils.UiHelper;
@@ -179,6 +180,7 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
 
     private PreferenceConfiguration prefConfig;
     private TouchBoostKeeper touchBoostKeeper;
+    private RootClockBoost rootClockBoost;
     private SharedPreferences tombstonePrefs;
 
     private int displayWidth;
@@ -3458,6 +3460,9 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
             if (touchBoostKeeper != null) {
                 touchBoostKeeper.stop();
             }
+            if (rootClockBoost != null) {
+                rootClockBoost.stop();
+            }
 
             controllerHandler.stop();
 
@@ -3689,6 +3694,13 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                 connected = true;
                 connecting = false;
                 updatePipAutoEnter();
+
+                if (prefConfig.mtkTweakRootBoost) {
+                    if (rootClockBoost == null) {
+                        rootClockBoost = new RootClockBoost();
+                    }
+                    rootClockBoost.start();
+                }
 
                 if (prefConfig.mtkTweakTouchBoost) {
                     if (touchBoostKeeper == null) {

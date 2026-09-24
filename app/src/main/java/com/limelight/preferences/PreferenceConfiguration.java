@@ -377,6 +377,7 @@ public class PreferenceConfiguration {
     public boolean mtkTweakVendorKeys;
     public boolean mtkTweakOperatingRate;
     public boolean mtkTweakTouchBoost;
+    public boolean mtkTweakRootBoost;
     public boolean fullRange;
     public boolean gamepadMotionSensors;
     public boolean gamepadTouchpadAsMouse;
@@ -1028,6 +1029,7 @@ private static int getFramePacingValue(Context context) {
         config.mtkTweakVendorKeys = mtkTweaks.contains("vendor");
         config.mtkTweakOperatingRate = mtkTweaks.contains("oprate");
         config.mtkTweakTouchBoost = mtkTweaks.contains("touchboost");
+        config.mtkTweakRootBoost = mtkTweaks.contains("rootboost");
         config.fullRange = prefs.getBoolean(FULL_RANGE_PREF_STRING, DEFAULT_FULL_RANGE);
         config.gamepadTouchpadAsMouse = prefs.getBoolean(GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING, DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE);
         config.gamepadMotionSensors = prefs.getBoolean(GAMEPAD_MOTION_SENSORS_PREF_STRING, DEFAULT_GAMEPAD_MOTION_SENSORS);
