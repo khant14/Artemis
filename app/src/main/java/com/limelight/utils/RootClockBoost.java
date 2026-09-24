@@ -62,7 +62,7 @@ public class RootClockBoost {
             return;
         }
         running = true;
-        status = "root: requesting";
+        status = "root boost: requesting su...";
         thread = new Thread(this::run, "RootClockBoost");
         thread.start();
     }
@@ -86,7 +86,8 @@ public class RootClockBoost {
             String discovery = exec(DISCOVER);
             LimeLog.info("RootClockBoost discovery:\n" + discovery);
             if (!discovery.contains("uid=0")) {
-                status = "root: denied";
+                status = "root boost: su denied (" + discovery.trim().replace('\n', ' ') + ")";
+                running = false;
                 return;
             }
 
@@ -103,7 +104,8 @@ public class RootClockBoost {
             }
         } catch (Exception e) {
             LimeLog.warning("RootClockBoost failed: " + e);
-            status = "root: unavailable";
+            status = "root boost: su unavailable (" + e.getMessage() + ")";
+            running = false;
         } finally {
             try {
                 if (stdin != null) {
@@ -117,7 +119,10 @@ public class RootClockBoost {
                 if (su != null) {
                     su.destroy();
                 }
-                status = null;
+                // Keep error messages visible in the overlay; clear only on a normal stop
+                if (status == null || !status.startsWith("root boost: su")) {
+                    status = null;
+                }
             }
         }
     }
