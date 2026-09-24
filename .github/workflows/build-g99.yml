@@ -25,6 +25,13 @@ jobs:
           yes | "$SDKMANAGER" --licenses > /dev/null || true
           "$SDKMANAGER" "ndk;27.0.12077973" "platforms;android-36"
 
+      - name: Restore signing key
+        # Reuse the same generated key across runs so new builds install as updates
+        uses: actions/cache@v4
+        with:
+          path: ~/.artemis-signing/release.jks
+          key: artemis-g99-signing-key-v1
+
       - name: Create signing key
         # Throwaway key so the release (non-debuggable) build is installable.
         # Set a KEYSTORE_BASE64 secret to keep the same signature across builds.
@@ -34,8 +41,12 @@ jobs:
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
           else
-            keytool -genkeypair -v -keystore "$RUNNER_TEMP/release.jks" -storepass android -keypass android \
-              -alias artemis -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Artemis G99"
+            mkdir -p ~/.artemis-signing
+            if [ ! -f ~/.artemis-signing/release.jks ]; then
+              keytool -genkeypair -v -keystore ~/.artemis-signing/release.jks -storepass android -keypass android \
+                -alias artemis -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Artemis G99"
+            fi
+            cp ~/.artemis-signing/release.jks "$RUNNER_TEMP/release.jks"
           fi
 
       - name: Build
