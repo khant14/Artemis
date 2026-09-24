@@ -53,6 +53,13 @@ ifeq ($(NDK_DEBUG),1)
 LOCAL_CFLAGS += -DLC_DEBUG
 endif
 
+# Tune for MediaTek Helio G99 (Cortex-A76 + Cortex-A55, both ARMv8.2-A)
+ifeq ($(DEVICE_TARGET),g99)
+ifeq ($(TARGET_ARCH_ABI),arm64-v8a)
+LOCAL_CFLAGS += -O3 -mcpu=cortex-a76
+endif
+endif
+
 LOCAL_LDLIBS := -llog
 
 LOCAL_STATIC_LIBRARIES := libopus libssl libcrypto cpufeatures

@@ -1,0 +1,52 @@
+name: Build G99 APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ 'claude/sharp-euler-nz9ulh' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        run: sdkmanager "ndk;27.0.12077973"
+
+      - name: Create signing key
+        # Throwaway key so the release (non-debuggable) build is installable.
+        # Set a KEYSTORE_BASE64 secret to keep the same signature across builds.
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          else
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/release.jks" -storepass android -keypass android \
+              -alias artemis -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Artemis G99"
+          fi
+
+      - name: Build
+        env:
+          ARTEMIS_KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          ARTEMIS_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'android' }}
+          ARTEMIS_KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'artemis' }}
+          ARTEMIS_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'android' }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleNonRoot_gameRelease -PdeviceTarget=g99
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artemis-g99-release
+          path: app/build/outputs/apk/nonRoot_game/release/*.apk

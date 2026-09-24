@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+// Optional device-tuned build, e.g. ./gradlew assembleNonRoot_gameRelease -PdeviceTarget=g99
+def deviceTarget = project.findProperty('deviceTarget')
+
 android {
     ndkVersion "27.0.12077973"
 
@@ -16,6 +19,28 @@ android {
 
         // Generate native debug symbols to allow Google Play to symbolicate our native crashes
         ndk.debugSymbolLevel = 'FULL'
+
+        if (deviceTarget == 'g99') {
+            // MediaTek Helio G99 (Cortex-A76 + A55) handhelds such as the AYANEO Pocket Micro
+            ndk.abiFilters 'arm64-v8a'
+            applicationIdSuffix ".g99"
+            externalNativeBuild {
+                ndkBuild {
+                    arguments "DEVICE_TARGET=g99"
+                }
+            }
+        }
+    }
+
+    signingConfigs {
+        if (System.getenv('ARTEMIS_KEYSTORE_FILE')) {
+            env {
+                storeFile file(System.getenv('ARTEMIS_KEYSTORE_FILE'))
+                storePassword System.getenv('ARTEMIS_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ARTEMIS_KEY_ALIAS')
+                keyPassword System.getenv('ARTEMIS_KEY_PASSWORD')
+            }
+        }
     }
 
     flavorDimensions.add("root")
@@ -129,6 +154,9 @@ android {
             //
             // TL;DR: Leave the following line alone!
             applicationIdSuffix ".noir"
+            if (System.getenv('ARTEMIS_KEYSTORE_FILE')) {
+                signingConfig signingConfigs.env
+            }
             resValue "string", "app_label", "Artemis"
             resValue "string", "app_label_root", "Artemis (Root)"
             resValue "string", "app_label_game", "Artemis (Game)"
