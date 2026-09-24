@@ -48,6 +48,15 @@ public class MediaCodecHelper {
     private static final List<String> amlogicDecoderPrefixes;
     private static final List<String> mediatekDecoderPrefixes;
     private static final Map<String, List<String>> vendorLowLatencyParamCache = new HashMap<>();
+
+    // User-selectable MediaTek tweaks (see PreferenceConfiguration.mtkTweak*)
+    private static boolean mtkVendorKeysEnabled = false;
+    private static boolean mtkOperatingRateEnabled = false;
+
+    public static void setMediatekTweaks(boolean vendorKeys, boolean operatingRate) {
+        mtkVendorKeysEnabled = vendorKeys;
+        mtkOperatingRateEnabled = operatingRate;
+    }
     private static final List<String> knownVendorLowLatencyOptions;
 
     public static final boolean SHOULD_BYPASS_SOFTWARE_BLOCK =
@@ -518,7 +527,12 @@ public class MediaCodecHelper {
     }
 
     private static boolean decoderSupportsKnownVendorLowLatencyOption(String decoderName) {
-        return !getVendorLowLatencyParams(decoderName).isEmpty();
+        for (String param : getVendorLowLatencyParams(decoderName)) {
+            if (knownVendorLowLatencyOptions.contains(param) || mtkVendorKeysEnabled) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean decoderSupportsMaxOperatingRate(String decoderName) {
@@ -539,7 +553,7 @@ public class MediaCodecHelper {
     // Raises the decode clock on MediaTek C2 decoders. A realistic rate is used instead of
     // Short.MAX_VALUE, which is known to crash non-Qualcomm decoders when paired with KEY_PRIORITY.
     private static boolean setMediatekOperatingRate(MediaFormat videoFormat, String decoderName) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+        if (!mtkOperatingRateEnabled || Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
                 !decoderName.toLowerCase(Locale.ROOT).startsWith("c2.mtk")) {
             return false;
         }
@@ -565,7 +579,7 @@ public class MediaCodecHelper {
         boolean setNewOption = false;
         boolean isMediatek = isDecoderInList(mediatekDecoderPrefixes, decoderInfo.getName());
 
-        if (tryNumber < 1 && isMediatek) {
+        if (tryNumber < 1 && isMediatek && mtkVendorKeysEnabled) {
             // MediaTek C2 decoders ignore vdec-lowlatency (OMX-only) and may advertise
             // FEATURE_LowLatency, which returns early below. Apply the probed vendor
             // low latency parameters and a boosted operating rate on the first try.
@@ -573,9 +587,9 @@ public class MediaCodecHelper {
                 videoFormat.setInteger(param, 1);
                 setNewOption = true;
             }
-            if (setMediatekOperatingRate(videoFormat, decoderInfo.getName())) {
-                setNewOption = true;
-            }
+        }
+        if (tryNumber < 1 && isMediatek && setMediatekOperatingRate(videoFormat, decoderInfo.getName())) {
+            setNewOption = true;
         }
 
         if (tryNumber < 1) {

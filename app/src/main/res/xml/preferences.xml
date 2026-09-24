@@ -770,6 +770,13 @@
             android:summary="@string/summary_checkbox_prefer_performance_cores"
             android:title="@string/title_checkbox_prefer_performance_cores"
             app:iconSpaceReserved="false" />
+        <MultiSelectListPreference
+            android:key="list_mtk_latency_tweaks"
+            android:entries="@array/mtk_latency_tweak_names"
+            android:entryValues="@array/mtk_latency_tweak_values"
+            android:summary="@string/summary_list_mtk_latency_tweaks"
+            android:title="@string/title_list_mtk_latency_tweaks"
+            app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="checkbox_full_range"

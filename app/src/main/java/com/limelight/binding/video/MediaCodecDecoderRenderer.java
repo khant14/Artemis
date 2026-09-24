@@ -309,6 +309,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         this.activity = activity;
         this.prefs = prefs;
         this.crashListener = crashListener;
+        MediaCodecHelper.setMediatekTweaks(prefs.mtkTweakVendorKeys, prefs.mtkTweakOperatingRate);
         this.consecutiveCrashCount = consecutiveCrashCount;
         this.glRenderer = glRenderer;
         this.perfListener = perfListener;
@@ -1057,7 +1058,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
         rendererThread = new Thread() {
             @Override
             public void run() {
-                StreamThreadTuner.tuneCurrentThread("Renderer", prefs.preferPerformanceCores);
+                if (prefs.mtkTweakThreadPriority) {
+                    StreamThreadTuner.tuneCurrentThread("Renderer", prefs.preferPerformanceCores);
+                }
                 boolean nativeThreadsTuned = false;
 
                 BufferInfo info = new BufferInfo();
@@ -1066,7 +1069,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                         // Try to output a frame
                         int outIndex = videoDecoder.dequeueOutputBuffer(info, 50000);
                         if (outIndex >= 0) {
-                            if (!nativeThreadsTuned) {
+                            if (!nativeThreadsTuned && prefs.mtkTweakThreadPriority) {
                                 // All native streams are running once the first frame is decoded.
                                 // VideoRecv submits decode units directly for direct-submit decoders.
                                 StreamThreadTuner.tuneNamedThreads(prefs.preferPerformanceCores,
@@ -1168,6 +1171,7 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
             }
         };
         rendererThread.setName("Video - Renderer (MediaCodec)");
+        rendererThread.setPriority(Thread.NORM_PRIORITY + 2);
         rendererThread.start();
     }
 

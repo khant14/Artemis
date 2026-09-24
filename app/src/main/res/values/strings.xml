@@ -270,6 +270,11 @@
     <string name="summary_unlock_fps">Streaming at 90 or 120 FPS may reduce latency on high-end devices but can cause lag or instability on devices that can\'t support it</string>
     <string name="title_checkbox_reduce_refresh_rate">Allow refresh rate reduction</string>
     <string name="summary_checkbox_reduce_refresh_rate">Lower display refresh rates can save power at the expense of some additional video latency</string>
+    <string name="title_list_mtk_latency_tweaks">Experimental latency tweaks</string>
+    <string name="summary_list_mtk_latency_tweaks">A/B test individual tweaks and compare decoding time in the performance overlay. All off matches stock behavior</string>
+    <string name="mtk_tweak_threads">Boost streaming thread priority</string>
+    <string name="mtk_tweak_vendor">MediaTek vendor low-latency keys (also enables RFI)</string>
+    <string name="mtk_tweak_oprate">MediaTek decoder clock boost (operating rate)</string>
     <string name="title_checkbox_prefer_performance_cores">Prefer performance CPU cores</string>
     <string name="summary_checkbox_prefer_performance_cores">Restrict video and input streaming threads to the fastest CPU cluster. May reduce latency jitter on big.LITTLE devices (e.g. MediaTek)</string>
     <string name="title_checkbox_disable_warnings">Disable warning messages</string>

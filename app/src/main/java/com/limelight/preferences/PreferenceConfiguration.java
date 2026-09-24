@@ -80,6 +80,7 @@ public class PreferenceConfiguration {
     private static final String ENABLE_AUDIO_FX_PREF_STRING = "checkbox_enable_audiofx";
     private static final String REDUCE_REFRESH_RATE_PREF_STRING = "checkbox_reduce_refresh_rate";
     private static final String PREFER_PERFORMANCE_CORES_PREF_STRING = "checkbox_prefer_performance_cores";
+    private static final String MTK_TWEAKS_PREF_STRING = "list_mtk_latency_tweaks";
     private static final String FULL_RANGE_PREF_STRING = "checkbox_full_range";
     private static final String GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING = "checkbox_gamepad_touchpad_as_mouse";
     private static final String GAMEPAD_MOTION_SENSORS_PREF_STRING = "checkbox_gamepad_motion_sensors";
@@ -308,6 +309,9 @@ public class PreferenceConfiguration {
     public boolean enableAudioFx;
     public boolean reduceRefreshRate;
     public boolean preferPerformanceCores;
+    public boolean mtkTweakThreadPriority;
+    public boolean mtkTweakVendorKeys;
+    public boolean mtkTweakOperatingRate;
     public boolean fullRange;
     public boolean gamepadMotionSensors;
     public boolean gamepadTouchpadAsMouse;
@@ -870,6 +874,10 @@ public class PreferenceConfiguration {
         config.enableAudioFx = prefs.getBoolean(ENABLE_AUDIO_FX_PREF_STRING, DEFAULT_ENABLE_AUDIO_FX);
         config.reduceRefreshRate = prefs.getBoolean(REDUCE_REFRESH_RATE_PREF_STRING, DEFAULT_REDUCE_REFRESH_RATE);
         config.preferPerformanceCores = prefs.getBoolean(PREFER_PERFORMANCE_CORES_PREF_STRING, DEFAULT_PREFER_PERFORMANCE_CORES);
+        java.util.Set<String> mtkTweaks = prefs.getStringSet(MTK_TWEAKS_PREF_STRING, new java.util.HashSet<String>());
+        config.mtkTweakThreadPriority = mtkTweaks.contains("threads");
+        config.mtkTweakVendorKeys = mtkTweaks.contains("vendor");
+        config.mtkTweakOperatingRate = mtkTweaks.contains("oprate");
         config.fullRange = prefs.getBoolean(FULL_RANGE_PREF_STRING, DEFAULT_FULL_RANGE);
         config.gamepadTouchpadAsMouse = prefs.getBoolean(GAMEPAD_TOUCHPAD_AS_MOUSE_PREF_STRING, DEFAULT_GAMEPAD_TOUCHPAD_AS_MOUSE);
         config.gamepadMotionSensors = prefs.getBoolean(GAMEPAD_MOTION_SENSORS_PREF_STRING, DEFAULT_GAMEPAD_MOTION_SENSORS);
