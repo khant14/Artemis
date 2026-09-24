@@ -77,7 +77,7 @@ public class RootClockBoost {
 
     private void run() {
         try {
-            su = Runtime.getRuntime().exec("su");
+            su = startSu();
             stdin = new OutputStreamWriter(su.getOutputStream());
             stdout = new BufferedReader(new InputStreamReader(su.getInputStream()));
             // Never let stderr fill up and block the shell
@@ -125,6 +125,26 @@ public class RootClockBoost {
                 }
             }
         }
+    }
+
+    // "su" on PATH (Magisk/KernelSU), then common absolute locations such as the
+    // /data/local/tmp/su installed by RetroAndroidShell's enable_root.sh on AYANEO/Retroid.
+    private static final String[] SU_CANDIDATES = {
+            "su", "/system/bin/su", "/system/xbin/su", "/data/local/tmp/su", "/sbin/su", "/debug_ramdisk/su"
+    };
+
+    private static Process startSu() throws java.io.IOException {
+        java.io.IOException last = null;
+        for (String candidate : SU_CANDIDATES) {
+            try {
+                Process p = Runtime.getRuntime().exec(candidate);
+                LimeLog.info("RootClockBoost using " + candidate);
+                return p;
+            } catch (java.io.IOException e) {
+                last = e;
+            }
+        }
+        throw last;
     }
 
     private static String formatClocks(String raw) {
