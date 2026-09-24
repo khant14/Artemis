@@ -3700,6 +3700,8 @@ public class Game extends AppCompatActivity implements SurfaceHolder.Callback,
                         rootClockBoost = new RootClockBoost();
                     }
                     rootClockBoost.start();
+                } else {
+                    RootClockBoost.status = null;
                 }
 
                 if (prefConfig.mtkTweakTouchBoost) {
