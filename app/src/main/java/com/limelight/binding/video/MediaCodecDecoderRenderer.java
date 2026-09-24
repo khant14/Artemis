@@ -20,6 +20,7 @@ import com.limelight.nvstream.av.video.VideoDecoderRenderer;
 import com.limelight.nvstream.jni.MoonBridge;
 import com.limelight.preferences.PreferenceConfiguration;
 import com.limelight.utils.StreamThreadTuner;
+import com.limelight.utils.FsrRenderer;
 import com.limelight.utils.Stereo3DRenderer;
 import com.limelight.utils.TrafficStatsHelper;
 
@@ -1829,6 +1830,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     sb.append(context.getString(R.string.perf_overlay_lite_netdrops,(float)lastTwo.framesLost / lastTwo.totalFrames * 100));
                     sb.append("\t FPS：");
                     sb.append(context.getString(R.string.perf_overlay_lite_fps, fps.totalFps));
+                    if (FsrRenderer.isActive) {
+                        sb.append(String.format(java.util.Locale.US, " FSR: %.1fms", FsrRenderer.drawDelayMs));
+                    }
                     if(Stereo3DRenderer.isActive) {
                         sb.append(" ");
                         sb.append(context.getString(R.string.perf_overlay_ai_fps));
@@ -1858,6 +1862,9 @@ public class MediaCodecDecoderRenderer extends VideoDecoderRenderer implements C
                     } else {
                         // If GPU renders the frames, the render FPS is the actual drawn and visible fps for the user
                         sb.append(context.getString(R.string.perf_overlay_streamdetails, initialWidth + "x" + initialHeight, fps.totalFps));
+                        if (FsrRenderer.isActive) {
+                            sb.append(String.format(java.util.Locale.US, " | FSR delay: %.2f ms", FsrRenderer.drawDelayMs));
+                        }
                     }
                     sb.append('\n');
                     sb.append(context.getString(R.string.perf_overlay_decoder, decoder)).append('\n');

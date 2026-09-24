@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import com.limelight.Game;
 import com.limelight.LimeLog;
 import com.limelight.preferences.PreferenceConfiguration;
+import com.limelight.utils.FsrRenderer;
 import com.limelight.utils.Stereo3DRenderer;
 
 /**
@@ -36,12 +37,14 @@ public class StreamContainer extends FrameLayout implements SurfaceHolder.Callba
     public enum StreamMode {
         MODE_2D,
         MODE_AI_3D,
-        MODE_AI_3D_MOVIE
+        MODE_AI_3D_MOVIE,
+        MODE_FSR
     }
 
     private Game game;
     private PreferenceConfiguration prefConfig;
     private Stereo3DRenderer mStereoRenderer;
+    private FsrRenderer mFsrRenderer;
 
     private SurfaceView mSurfaceView;
     private Surface mCurrentSurface;
@@ -83,7 +86,16 @@ public class StreamContainer extends FrameLayout implements SurfaceHolder.Callba
         mSurfaceView = new SurfaceView(context);
         addView(mSurfaceView, childParams);
 
-        if (renderMode != StreamMode.MODE_2D) {
+        if (renderMode == StreamMode.MODE_FSR) {
+            GLSurfaceView glSurfaceView = new GLSurfaceView(context);
+            glSurfaceView.setEGLContextClientVersion(3);
+            mFsrRenderer = new FsrRenderer(glSurfaceView, this, prefConfig);
+            glSurfaceView.setRenderer(mFsrRenderer);
+            glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+            mSurfaceView = glSurfaceView;
+            addView(mSurfaceView, childParams);
+        }
+        else if (renderMode != StreamMode.MODE_2D) {
             GLSurfaceView glSurfaceView = new GLSurfaceView(context);
             glSurfaceView.setEGLContextClientVersion(3);
             mStereoRenderer = new Stereo3DRenderer(glSurfaceView, this, context, prefConfig);
@@ -112,7 +124,7 @@ public class StreamContainer extends FrameLayout implements SurfaceHolder.Callba
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (renderMode != StreamMode.MODE_2D) {
+        if (renderMode != StreamMode.MODE_2D && renderMode != StreamMode.MODE_FSR) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }
@@ -252,6 +264,8 @@ public class StreamContainer extends FrameLayout implements SurfaceHolder.Callba
             mCurrentSurface = null;
         } else if (mStereoRenderer != null) {
             mStereoRenderer.onSurfaceDestroyed();
+        } else if (mFsrRenderer != null) {
+            mFsrRenderer.onSurfaceDestroyed();
         }
 
         game.surfaceDestroyed(holder);
@@ -268,6 +282,9 @@ public class StreamContainer extends FrameLayout implements SurfaceHolder.Callba
     public void onDestroy() {
         if (mStereoRenderer != null) {
             mStereoRenderer.onSurfaceDestroyed();
+        }
+        if (mFsrRenderer != null) {
+            mFsrRenderer.onSurfaceDestroyed();
         }
     }
 }

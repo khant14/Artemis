@@ -581,6 +581,7 @@
     <string name="render_mode_2d">Default 2D</string>
     <string name="render_mode_3d_sbs">AI SBS 3D</string>
     <string name="render_mode_3d_sbs_movie">AI SBS 3D Movie (Synced)</string>
+    <string name="render_mode_fsr">FSR 1 upscaling (experimental)</string>
     <string name="mouse_mode_absolute_touch">Absolute touch</string>
     <string name="mouse_mode_track_pad_natural">Track pad(Natural/Double tap to drag)</string>
     <string name="mouse_mode_track_pad_gaming">Track pad(Gaming/Long press to drag)</string>
