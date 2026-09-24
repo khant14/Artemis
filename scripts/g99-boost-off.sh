@@ -9,4 +9,5 @@ for d in /sys/devices/platform/*dvfsrc*/helio-dvfsrc /sys/devices/platform/soc/*
 done
 echo -1 > /proc/gpufreqv2/fix_target_opp_index 2>/dev/null
 echo 0 > /proc/gpufreq/gpufreq_opp_freq 2>/dev/null
-echo "boost off $(date)" >> /sdcard/g99-boost.log
+echo "boost off $(date)" >> /data/local/tmp/g99-boost.log
+cp /data/local/tmp/g99-boost.log /data/media/0/g99-boost.log 2>/dev/null

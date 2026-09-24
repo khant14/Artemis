@@ -1,8 +1,9 @@
 #!/system/bin/sh
 # Pin MediaTek Helio G99 CPU/DRAM/GPU clocks high while streaming (requires root).
 # Emulates the touch boost that lowers decode latency. Undo with g99-boost-off.sh.
-LOG=/sdcard/g99-boost.log
+LOG=/data/local/tmp/g99-boost.log
 echo "boost on $(date)" > $LOG
+id >> $LOG
 w() { [ -e "$1" ] && echo "$2" > "$1" 2>/dev/null && echo "set $1=$2" >> $LOG; }
 
 # CPU: floor every cluster at its max frequency
@@ -20,4 +21,5 @@ done
 w /proc/gpufreqv2/fix_target_opp_index 0
 w /proc/gpufreq/gpufreq_opp_freq "$(head -1 /proc/gpufreq/gpufreq_opp_dump 2>/dev/null | sed -n 's/.*freq = \([0-9]*\).*/\1/p')"
 
+cp $LOG /data/media/0/g99-boost.log 2>/dev/null
 cat $LOG
